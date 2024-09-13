@@ -1,11 +1,18 @@
 from typing import List
 import pyrebase
+import dotenv
+import os
+
+dotenv.load_dotenv()
+
+FIREBASE_KEY = os.environ.get("FIREBASE_KEY")
+FIREBASE_PROJECT = os.environ.get("FIREBASE_PROJECT")
 
 demo_config = {
-    "apiKey": "AIzaSyBJ40d8bNo2x_reFNjfxCUinALH24Rzh9Y",
-    "authDomain": "seer-3ec9b.firebaseapp.com",
-    "databaseURL": "https://seer-3ec9b-default-rtdb.firebaseio.com",
-    "storageBucket": "seer-3ec9b.appspot.com"
+    "apiKey": FIREBASE_KEY,
+    "authDomain": f"{FIREBASE_PROJECT}.firebaseapp.com",
+    "databaseURL": f"https://{FIREBASE_PROJECT}-default-rtdb.firebaseio.com",
+    "storageBucket": f"{FIREBASE_PROJECT}.appspot.com"
 }
 
 class Firebase_conn():
