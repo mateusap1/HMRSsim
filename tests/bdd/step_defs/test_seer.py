@@ -2,15 +2,15 @@ import pytest
 from pytest_bdd import scenarios, given, when, then, parsers
 import json
 from simulator.main import Simulator
-from tests.helpers.ScenarioCreationHelper import ScenarioCreationHelper
-from tests.helpers.AssertionHelper import AssertionHelper
+from tests.bdd.helpers.ScenarioCreationHelper import ScenarioCreationHelper
+from tests.bdd.helpers.AssertionHelper import AssertionHelper
 
 scenarios('../features/seer.feature')
 
 @pytest.fixture
 def config():
     config = {
-        "context": "tests/data",
+        "context": "tests/bdd/data",
         "FPS": 60,
         "DLW": 10,
         "duration": 10
@@ -25,7 +25,7 @@ def scenario_helper(simulation):
 def assertion_helper(simulation):
     return AssertionHelper(simulation)
 
-fd = open('tests/data/seer_report.txt', 'w')
+fd = open('tests/bdd/data/seer_report.txt', 'w')
 
 def clean():
     fd.close()
@@ -60,7 +60,7 @@ def run_simulation(simulation):
 
 @then("all snapshots were recorded by the Seer system in a file")
 def check_recorded_snapshots():
-    with open('tests/data/seer_report.txt', 'r') as report:
+    with open('tests/bdd/data/seer_report.txt', 'r') as report:
         first_line = json.loads(report.readline())
 
     assert "timestamp" in first_line

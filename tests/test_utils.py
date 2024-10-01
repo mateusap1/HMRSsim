@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from simulator.utils.mxgraph import inflate
 
 working_dir = os.path.dirname(os.path.realpath(__file__))
-data_dir = os.path.join(working_dir, 'data')
+data_dir = os.path.join(working_dir, 'bdd/data')
 
 def test_inflate_drawio_xml():
     #content = readFromCompresedXml(data_dir+'/room.drawio')

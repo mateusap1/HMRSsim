@@ -5,7 +5,7 @@ Feature: Camera
 # Acceptance Criteria: the simulation must receive the information that the person 
 # was detected by the camera
 
-# Map: tests/data/camera_map.drawio
+# Map: tests/bdd/data/camera_map.drawio
 # Map description: Consists of four patients room, three people around the map and three robots
 # that can follow the different paths on the map to find these people  
 

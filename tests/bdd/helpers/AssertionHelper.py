@@ -2,7 +2,7 @@ from simulator.components.ApproximationHistory import ApproximationHistory
 from simulator.components.CollisionHistory import CollisionHistory
 from simulator.components.Position import Position
 from simulator.components.Camera import Camera
-from tests.helpers.TestHelper import TestHelper
+from tests.bdd.helpers.TestHelper import TestHelper
 
 class AssertionHelper(TestHelper):
     def __init__(self, simulation) -> None:

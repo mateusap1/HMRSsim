@@ -4,15 +4,15 @@ from pytest_bdd import scenarios, given, when, then
 from simulator.main import Simulator
 from simulator.components.Map import Map
 
-from tests.helpers.ScenarioCreationHelper import ScenarioCreationHelper
-from tests.helpers.AssertionHelper import AssertionHelper
+from tests.bdd.helpers.ScenarioCreationHelper import ScenarioCreationHelper
+from tests.bdd.helpers.AssertionHelper import AssertionHelper
 
 scenarios('../features/robot_displacement.feature')
 
 @pytest.fixture
 def config():
     config = {
-        "context": "tests/data",
+        "context": "tests/bdd/data",
         "FPS": 60,
         "DLW": 10,
         "duration": 10

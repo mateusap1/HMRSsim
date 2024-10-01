@@ -7,7 +7,7 @@ Feature: Robot Displacement
 # Acceptance Criteria - Second Scenario: the robot is capable of go to a
 # specific position given a GotoPos Event.
 
-# Map: tests/data/three_room_map.drawio
+# Map: tests/bdd/data/three_room_map.drawio
 # Map description: consists of three rooms, a robot and a path that leads
 # the robot to the third room
 

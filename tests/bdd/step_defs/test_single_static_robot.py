@@ -2,8 +2,8 @@ import pytest
 from pytest_bdd import scenarios, given, when, then, parsers
 from simulator.main import Simulator
 
-from tests.helpers.ScenarioCreationHelper import ScenarioCreationHelper
-from tests.helpers.AssertionHelper import AssertionHelper
+from tests.bdd.helpers.ScenarioCreationHelper import ScenarioCreationHelper
+from tests.bdd.helpers.AssertionHelper import AssertionHelper
 
 scenarios('../features/single_static_robot.feature')
 
@@ -18,7 +18,7 @@ def assertion_helper(simulation):
 @given("a map with one room", target_fixture="simulation")
 def map_with_one_room():
     config = {
-        "context": "tests/data",
+        "context": "tests/bdd/data",
         "map": "one_room_map.drawio",
         "FPS": 60,
         "DLW": 10,

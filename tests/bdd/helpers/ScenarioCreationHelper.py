@@ -20,7 +20,7 @@ import simulator.systems.SeerPlugin as Seer
 from simulator.components.Path import Path
 from simulator.components.Map import Map
 from simulator.typehints.component_types import EVENT
-from tests.helpers.TestHelper import TestHelper
+from tests.bdd.helpers.TestHelper import TestHelper
 
 class ScenarioCreationHelper(TestHelper):
     def __init__(self, simulation):

@@ -5,7 +5,7 @@ Feature: Single Static Robot
 
 # Acceptance Criteria: the robot remains in the same place during the simulation
 
-# Map: tests/data/one_room_map.drawio
+# Map: tests/bdd/data/one_room_map.drawio
 # Map description: 'A map' has one room and a robot inside it.
 
 Scenario: Single static robot

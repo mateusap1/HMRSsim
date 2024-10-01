@@ -5,8 +5,8 @@ from main import Simulator
 #NAMESPACE = 'cris'
 #clean_old_simulation(NAMESPACE)
 
-from tests.helpers.ScenarioCreationHelper import ScenarioCreationHelper
-from tests.helpers.AssertionHelper import AssertionHelper
+from tests.bdd.helpers.ScenarioCreationHelper import ScenarioCreationHelper
+from tests.bdd.helpers.AssertionHelper import AssertionHelper
 
 #def firebase_seer_consumer(message, msg_idx):
 #    """Sends Seer messages to firebase."""
@@ -19,7 +19,7 @@ from tests.helpers.AssertionHelper import AssertionHelper
 
 
 config = {
-        "context": "tests/data",
+        "context": "tests/bdd/data",
         "FPS": 60,
         "DLW": 10,
         "duration": 10

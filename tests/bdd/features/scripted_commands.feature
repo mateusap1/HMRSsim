@@ -10,7 +10,7 @@ Feature: Scripted Commands
 #   Third Scenario: the robot1 is capable of drag and drop a pickable and
 # the robot2 is capable of go to a specific POI both in the same simulation.
 
-# Map for first and second scenario: tests/data/med_and_patient_room_map.drawio
+# Map for first and second scenario: tests/bdd/data/med_and_patient_room_map.drawio
 # Map description: 
 
 Scenario: The robot Go to a POI using a script command

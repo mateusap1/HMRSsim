@@ -7,7 +7,7 @@ Feature: Simple Scripted Command
 #   First Scenario: the robots are able to follow all the commands specified 
 # on the drawio map and at the end, the medication must be in the correct room.
 
-# Map: tests/data/med_and_patient_room_map_with_commands.drawio
+# Map: tests/bdd/data/med_and_patient_room_map_with_commands.drawio
 # Map description: The map has three POIs (robotHome, medRoom and patientRoom), 
 # and a pickable named medicine in the medicine room. The map also has a robot
 # with this scripts: "Go medRoom", "Grab medicine", "Go patientRoom", "Drop medicine".

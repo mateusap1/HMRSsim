@@ -5,7 +5,7 @@ Feature: Collision
 # Acceptance Criteria: the simulation must receive a collision event 
 # when the robot collides with the wall
 
-# Map: tests/data/collidable_wall_map.drawio
+# Map: tests/bdd/data/collidable_wall_map.drawio
 # Map description: Consists of one room with colidable walls and
 # two robots that has a path that collides with the wall
 
