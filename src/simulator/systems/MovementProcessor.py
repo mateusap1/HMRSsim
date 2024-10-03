@@ -30,10 +30,8 @@ class MovementProcessor(esper.Processor):
         # When it starts (which is after the simulation is loaded) it will initialize the sector
         # Of all entities that have a position
         # This is done just once in the first execution
-        for ent, (pos,) in self.world.get_components(Position):
-            pos.sector = ((pos.y // self.sector_size) * self.maxx) + (
-                pos.x // self.sector_size
-            )
+        for _, (position,) in self.world.get_components(Position):
+            position.sector = self.calculate_sector(position)
 
         self.setup_ready = True
 
