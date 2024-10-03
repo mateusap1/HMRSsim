@@ -34,7 +34,7 @@ def process(kwargs: SystemArgs):
         if _WORLD.has_component(payload.entity, Camera):
             _WORLD.remove_component(payload.entity, Camera)
 
-def move_to_detected_target(entity, target):
+def move_to_detected_target(entity: int, target: int):
     target_position = _WORLD.component_for_entity(target, Position)
     destiny_position = target_position.center
 

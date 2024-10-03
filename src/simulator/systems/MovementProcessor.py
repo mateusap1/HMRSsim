@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 from simulator.components.Position import Position
 from simulator.components.Velocity import Velocity
 
+from simulator.typehints.dict_types import SystemArgs
+
 
 class MovementProcessor(esper.Processor):
     def __init__(self, minx, maxx, miny, maxy, sector_size=50):
@@ -20,7 +22,7 @@ class MovementProcessor(esper.Processor):
         self.runs = 0
         self.created_tiles = False
 
-    def process(self, env):
+    def process(self, kwargs: SystemArgs):
         logger = logging.getLogger(__name__)
         # start = datetime.now()
 
