@@ -8,10 +8,12 @@ from simulator.components.Position import Position
 from typing import NamedTuple
 from simulator.typehints.dict_types import SystemArgs
 from simulator.typehints.component_types import EVENT
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from colorama import init, Fore
+
 init()
+
 
 COLORS = [Fore.BLUE, Fore.CYAN, Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.WHITE]
 CollisionPayload = NamedTuple('CollisionEvent', [('ent', int), ('other_ent', int)])
@@ -26,7 +28,6 @@ class CollisionProcessor(esper.Processor):
 
     def process(self, kwargs: SystemArgs):
         # start = datetime.now()
-        logger = logging.getLogger(__name__)
         eventStore = kwargs.get('EVENT_STORE', None)
         all_collidables = self.world.get_components(Collidable, Position)
         for ent, (col, pos, vel) in self.world.get_components(Collidable, Position, Velocity):
@@ -53,16 +54,8 @@ class CollisionProcessor(esper.Processor):
                     vel.y = 0
                     vel.alpha = 0
                     if eventStore:
-                        # if col.event_tag == 'genericCollision':
-                            # self.logger.debug(choice(COLORS) + f'Collision! {ent} - {otherEnt}')
                         event = EVENT(col.event_tag, CollisionPayload(ent, otherEnt))
-                        # self.logger.debug(f'Firing event ent --> otherEnt: {event}')
                         eventStore.put(event)
-        # end = datetime.now()
-        # self.runs += 1
-        # self.total += end - start
-        # if self.runs % 50 == 0:
-        #     logger.debug(f'runs: {self.runs}; total: {self.total}; avg = {self.total / self.runs}')
 
     @staticmethod
     def checkCollide(shapes1, shapes2):

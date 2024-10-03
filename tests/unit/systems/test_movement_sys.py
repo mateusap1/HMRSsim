@@ -4,7 +4,10 @@ from simulator.components.Position import Position
 
 
 import esper
-import math
+
+
+# TODO: Add tests for sector and adjacent sector
+# Hopefully should be more modularized in order to do this test easier
 
 
 def test_movement_process_idle():
@@ -64,6 +67,3 @@ def test_movement_process():
     world.process({})
     assert (position.x, position.y) == (100.0, 50.0)
     assert position.changed is True
-
-
-
