@@ -121,7 +121,7 @@ class GotoDESProcessor:
         if target == source:
             self.logger.warning("Already at destination.")
             return
-
+        
         try:
             path = self.nav_function(world_map, source, target)
             add_nodes_from_points(world_map, path.points)
