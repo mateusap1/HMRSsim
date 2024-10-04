@@ -35,7 +35,7 @@ class MovementProcessor(esper.Processor):
 
         self.setup_ready = True
 
-    def get_move_ents(self) -> List[Tuple[int, Tuple[Velocity, Position]]]:
+    def get_move_ents(self) -> List[Tuple[int, Tuple[Position, Velocity]]]:
         # Returns every entity which has both of these components
 
         return self.world.get_components(Position, Velocity)
