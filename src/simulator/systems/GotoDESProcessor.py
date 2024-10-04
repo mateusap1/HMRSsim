@@ -74,6 +74,16 @@ class GotoDESProcessor:
 
         return tuple(map(lambda p: float(p), event_payload.target))
 
+    def add_path_to_ent(
+        self, ent: int, world: World, world_map: Map, source: Point, target: Point
+    ):
+        path = self.nav_function(world_map, source, target)
+        add_nodes_from_points(world_map, path.points)
+
+        world.add_component(ent, path)
+
+        self.logger.debug(f"Added Path component to entity {ent} - {path}")
+
     def handle_target_error(
         self, event_store: FilterStore, payload: Union[GotoPoiPayload, GotoPosPayload]
     ):
@@ -121,15 +131,9 @@ class GotoDESProcessor:
         if target == source:
             self.logger.warning("Already at destination.")
             return
-        
-        try:
-            path = self.nav_function(world_map, source, target)
-            add_nodes_from_points(world_map, path.points)
-            world.add_component(payload.entity, path)
 
-            self.logger.debug(
-                f"Added Path component to entity {payload.entity} - {path}"
-            )
+        try:
+            self.add_path_to_ent(payload.entity, world, world_map, source, target)
         except PathNotFound as error:
             self.handle_path_error(event_store, payload, error)
 
