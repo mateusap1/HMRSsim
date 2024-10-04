@@ -20,6 +20,7 @@ from simulator.utils.Firebase import Firebase_conn
 def setup():
     # Create a simulation with config
     simulator = Simulator(sys.argv[1])
+
     # Some simulator objects
     width, height = simulator.window_dimensions
     # window = simulator.window
