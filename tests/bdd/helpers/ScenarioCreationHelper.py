@@ -88,7 +88,7 @@ class ScenarioCreationHelper(TestHelper):
 
     def add_ability_to_navigate(self, sector_size=50):
         """Adds the systems responsible for Go to a specific POI or Position."""
-        NavigationSystemProcess = NavigationSystem.init()
+        NavigationSystemProcess = NavigationSystem.GotoDESProcessor().process
         self.simulation.add_des_system((NavigationSystemProcess,))
         width, height = self.simulation.window_dimensions
         self.simulation.add_system(PathProcessor())

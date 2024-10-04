@@ -38,7 +38,7 @@ extra_instructions = [
     (ClawProcessor.DropInstructionTag, ClawProcessor.dropInstrution)
 ]
 ScriptProcessor = ScriptSystem.init(extra_instructions, [ClawProcessor.ClawDoneTag])
-NavigationSystemProcess = NavigationSystem.init()
+NavigationSystemProcess = NavigationSystem.GotoDESProcessor().process
 
 
 # Defines and initializes esper.Processor for the simulation

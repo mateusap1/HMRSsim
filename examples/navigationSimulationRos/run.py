@@ -37,7 +37,7 @@ def main():
     NAMESPACE = 'navigation_ros'
 
     ros2 = ROS2_conn()
-    NavigationSystemProcess = NavigationSystem.init()
+    NavigationSystemProcess = NavigationSystem.GotoDESProcessor().process
     ros_control = RosControlPlugin(scan_interval=0.1)
     ros_control.create_topic_server(RobotSpawnDESProcessor.RobotSpawnerRos(event_store=eventStore))
 

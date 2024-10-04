@@ -40,7 +40,7 @@ def main():
     NAMESPACE = 'navigation_ros'
 
     ros2 = ROS2_conn()
-    NavigationSystemProcess = NavigationSystem.init()
+    NavigationSystemProcess = NavigationSystem.GotoDESProcessor().process
     ros_control = RosControlPlugin(scan_interval=0.1)
     claw_services = ClawProcessor.create_grab_and_drop_for_each_robot(world=world, event_store=eventStore)
     for service in claw_services:

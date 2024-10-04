@@ -24,7 +24,7 @@ extra_instructions = [
     (NavigationSystem.GotoInstructionId, NavigationSystem.goInstruction),
 ]
 ScriptProcessor = ScriptSystem.init(extra_instructions, [])
-NavigationSystemProcess = NavigationSystem.init()
+NavigationSystemProcess = NavigationSystem.GotoDESProcessor().process
 # Create a simulation with config
 simulator = Simulator(generate_simulation_json(DRONE_COUNT))
 # Some simulator objects
