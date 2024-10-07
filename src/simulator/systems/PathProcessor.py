@@ -7,9 +7,8 @@ from simpy import FilterStore, Environment
 from simulator.components.Path import Path
 from simulator.components.Position import Position
 from simulator.components.Velocity import Velocity
-from simulator.components.Collidable import Collidable
 from simulator.components.ApproximationHistory import ApproximationHistory
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from simulator.typehints.component_types import (
     EVENT,
     EndOfPathPayload,
@@ -24,7 +23,13 @@ class PathProcessor(esper.Processor):
     def __init__(self):
         super().__init__()
 
+        self.initial_velocity: Dict[int, Tuple[float, float]] = {}
+
         self.logger = logging.getLogger(__name__)
+
+    def setup_initial_velocity(self, ent: int, velocity: Velocity):
+        if ent not in self.initial_velocity:
+            self.initial_velocity[ent] = (velocity.x, velocity.y)
 
     def get_event_store(self, kwargs: SystemArgs) -> FilterStore:
         event_store = kwargs.get("EVENT_STORE", None)
@@ -82,6 +87,8 @@ class PathProcessor(esper.Processor):
         env = self.get_environment(kwargs)
 
         for ent, (pos, vel, path) in self.get_path_ents():
+            self.setup_initial_velocity(ent, vel)
+
             point = path.points[path.curr_point]
             at_point = point == pos.center
 
@@ -90,11 +97,8 @@ class PathProcessor(esper.Processor):
 
                 reached_end = path.curr_point == len(path.points)
                 if reached_end:
-                    # I don't think we should do this. Each system should work independently
-                    # and this should only trigger an event saying that we have reached the end
-                    # of the path. Another system can change the velocity if desired.
-                    vel.x = 0
-                    vel.y = 0
+                    # Returns ent to velocity it had before path processor
+                    vel.x, vel.y = self.initial_velocity[ent]
 
                     event_store.put(
                         EVENT(
