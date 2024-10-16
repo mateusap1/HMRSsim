@@ -33,7 +33,7 @@ build_report = simulator.build_report
 firebase.send_build_report(build_report)
 
 extra_instructions = [
-    (NavigationSystem.GotoInstructionId, NavigationSystem.goInstruction),
+    (NavigationSystem.GotoInstructionId, NavigationSystem.go_instruction),
     (ClawProcessor.GrabInstructionTag, ClawProcessor.grabInstruction),
     (ClawProcessor.DropInstructionTag, ClawProcessor.dropInstrution)
 ]
@@ -65,7 +65,7 @@ for p in des_processors:
 
 # Create the error handlers dict
 error_handlers = {
-    NavigationSystem.PathErrorTag: NavigationSystem.handle_PathError
+    NavigationSystem.PathErrorTag: NavigationSystem.handle_path_error
 }
 # Adding error handlers to the robot
 robot = simulator.objects[0][0]

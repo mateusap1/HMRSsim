@@ -52,15 +52,15 @@ def test_process_event():
     event = EVENT(GotoPoiEventTag, GotoPoiPayload(robot, "patientRoom"))
     event_store.put(event)
 
-    processor.get_event_target = MagicMock(return_value=(75.0, 225.0))
-    processor.add_path_to_ent = MagicMock()
+    processor._get_event_target = MagicMock(return_value=(75.0, 225.0))
+    processor._add_path_to_ent = MagicMock()
 
-    processor.process_event(world, HOSPITAL_MAP, event_store, event)
+    processor._process_event(world, HOSPITAL_MAP, event_store, event)
 
-    processor.get_event_target.assert_called_with(
+    processor._get_event_target.assert_called_with(
         HOSPITAL_MAP, GotoPoiEventTag, GotoPoiPayload(robot, "patientRoom")
     )
-    processor.add_path_to_ent.assert_called_with(
+    processor._add_path_to_ent.assert_called_with(
         robot, world, HOSPITAL_MAP, (0.0, 0.0), (75.0, 225.0)
     )
 
@@ -77,15 +77,15 @@ def test_process_event_no_target():
     event = EVENT(GotoPoiEventTag, GotoPoiPayload(robot, "patientRoom"))
     event_store.put(event)
 
-    processor.get_event_target = MagicMock(return_value=None)
-    processor.handle_target_error = MagicMock()
+    processor._get_event_target = MagicMock(return_value=None)
+    processor._handle_target_error = MagicMock()
 
-    processor.process_event(world, HOSPITAL_MAP, event_store, event)
+    processor._process_event(world, HOSPITAL_MAP, event_store, event)
 
-    processor.get_event_target.assert_called_with(
+    processor._get_event_target.assert_called_with(
         HOSPITAL_MAP, GotoPoiEventTag, GotoPoiPayload(robot, "patientRoom")
     )
-    processor.handle_target_error.assert_called_with(
+    processor._handle_target_error.assert_called_with(
         event_store, GotoPoiPayload(robot, "patientRoom")
     )
 
@@ -104,16 +104,16 @@ def test_process_event_path_not_found():
 
     path_error = PathNotFound((0.0, 0.0), (75.0, 225.0), None)
 
-    processor.get_event_target = MagicMock(return_value=(75.0, 225.0))
-    processor.add_path_to_ent = MagicMock(side_effect=path_error)
-    processor.handle_path_error = MagicMock()
+    processor._get_event_target = MagicMock(return_value=(75.0, 225.0))
+    processor._add_path_to_ent = MagicMock(side_effect=path_error)
+    processor._handle_path_error = MagicMock()
 
-    processor.process_event(world, HOSPITAL_MAP, event_store, event)
+    processor._process_event(world, HOSPITAL_MAP, event_store, event)
 
-    processor.get_event_target.assert_called_with(
+    processor._get_event_target.assert_called_with(
         HOSPITAL_MAP, GotoPoiEventTag, GotoPoiPayload(robot, "patientRoom")
     )
-    processor.handle_path_error.assert_called_with(
+    processor._handle_path_error.assert_called_with(
         event_store, GotoPoiPayload(robot, "patientRoom"), path_error
     )
 
@@ -125,16 +125,16 @@ def test_get_event_target():
     world.create_entity(wmap)
 
     processor = GotoDESProcessor()
-    assert processor.get_event_target(
+    assert processor._get_event_target(
         wmap, GotoPoiEventTag, GotoPoiPayload(0, "patientRoom")
     ) == (75.0, 225.0)
 
-    assert processor.get_event_target(
+    assert processor._get_event_target(
         wmap, GotoPoiEventTag, GotoPoiPayload(0, "robotHome")
     ) == (500.0, 80.0)
 
     assert (
-        processor.get_event_target(
+        processor._get_event_target(
             wmap, GotoPoiEventTag, GotoPoiPayload(0, "nonexistent")
         )
         is None

@@ -21,7 +21,7 @@ from generate_simulation_json import generate_simulation_json, generate_shapes
 DRONE_COUNT = 48
 # Prep Script and Navigation systems
 extra_instructions = [
-    (NavigationSystem.GotoInstructionId, NavigationSystem.goInstruction),
+    (NavigationSystem.GotoInstructionId, NavigationSystem.go_instruction),
 ]
 ScriptProcessor = ScriptSystem.init(extra_instructions, [])
 NavigationSystemProcess = NavigationSystem.GotoDESProcessor().process

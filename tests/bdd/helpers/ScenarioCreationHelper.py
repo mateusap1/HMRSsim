@@ -111,7 +111,7 @@ class ScenarioCreationHelper(TestHelper):
     def add_script_ability(self):
         """Adds the systems responsible for make script commands Go, Grab and Drop."""
         extra_instructions = [
-            (NavigationSystem.GotoInstructionId, NavigationSystem.goInstruction),
+            (NavigationSystem.GotoInstructionId, NavigationSystem.go_instruction),
             (ClawProcessor.GrabInstructionTag, ClawProcessor.grabInstruction),
             (ClawProcessor.DropInstructionTag, ClawProcessor.dropInstrution)
         ]

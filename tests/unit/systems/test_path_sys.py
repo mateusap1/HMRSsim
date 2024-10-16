@@ -44,7 +44,6 @@ def test_path_process():
     assert (position.x, position.y) == (5.0, 0.0)
     assert path.curr_point == 2
 
-
     position.x, position.y = (0.0, 0.0)
     position.center = (0.0, 0.0)
     path.curr_point = 4
