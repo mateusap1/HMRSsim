@@ -1,4 +1,5 @@
 from typing import Tuple, Union, List, NamedTuple
+from dataclasses import dataclass
 
 Point = Tuple[Union[float, int], Union[float, int]]
 ShapeDefinition = Tuple[Point, List[Point]]
@@ -7,7 +8,8 @@ EVENT = NamedTuple('Event', [('type', str), ('payload', NamedTuple)])
 ERROR = NamedTuple('ErrorEvent', [('type', str), ('ent', int), ('payload', NamedTuple)])
 
 class Component:
-    pass
+    def __eq__(self, other: "Component"):
+        return vars(self) == vars(other)
 
 # Payloads and tags convention related to Goto events
 GotoPoiPayload = NamedTuple('GotoPoiPayload', [('entity', int), ('target', str)])
