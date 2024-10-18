@@ -104,17 +104,16 @@ class ObserverProcessor(esper.Processor):
         return changes
 
     def _get_state_change(
-        self,
+        self, new_state: Dict[int, List[Component]]
     ) -> Dict[int, List[Tuple[Component, ObserverChangeType]]]:
         # In cases where the entity dissapeared, we always assume
         # all of its components were removed. In reality, the
-        # entity could also have been destroyed.
+        # entity could have been destroyed instead.
 
         state_change = {}
 
         # This is so we entities which dissapeared or had their
         # components removed are also tracked.
-        new_state = self._get_ents()
         for ent in self.previous_state:
             if not ent in new_state:
                 new_state[ent] = []
@@ -141,7 +140,10 @@ class ObserverProcessor(esper.Processor):
         event_store = self._get_event_store(kwargs)
         env = self._get_environment(kwargs)
 
-        state_change = self._get_state_change()
+        new_state = self._get_ents()
+        state_change = self._get_state_change(new_state)
+        self.previous_state = new_state
+
         if len(state_change) > 0:
             event_store.put(
                 EVENT(
@@ -155,3 +157,6 @@ class ObserverProcessor(esper.Processor):
                     ),
                 )
             )
+        
+        
+        

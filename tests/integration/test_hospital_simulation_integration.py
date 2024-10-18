@@ -329,7 +329,7 @@ def test_hospital_simulation_integration(caplog, tmp_path, mock_map):
             "duration": 10,
             "verbose": 20,
         },
-        [Position, Inventory],
+        [Inventory],
     )
     script = objects[0]
 
