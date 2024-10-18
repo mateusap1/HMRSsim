@@ -5,6 +5,8 @@ from simulator.components.Position import Position
 from simulator.components.Path import Path
 from simulator.components.Map import Map
 
+from unittest.mock import MagicMock
+
 
 import esper
 
@@ -56,6 +58,11 @@ def test_get_components_change():
     assert removed == []
     assert added == []
 
+    old, new = [vel1, pos1], [vel12, pos12]
+    removed, added = obs._get_components_change(old, new)
+    assert removed == []
+    assert added == []
+
     old, new = [], [vel1, pos1]
     removed, added = obs._get_components_change(old, new)
     assert removed == []
@@ -88,3 +95,34 @@ def test_get_components_change():
     assert added == [pos2]
     assert removed[0].x == 0.0
     assert added[0].x == 1.0
+
+
+def test_get_state_change():
+    obs = ObserverProcessor([Velocity, Position, Path, Map])
+
+    vel1 = Velocity(x=0.0, y=0.0)
+    vel2 = Velocity(x=1.0, y=1.0)
+
+    pos1 = Position(x=0.0, y=0.0)
+    pos2 = Position(x=1.0, y=1.0)
+
+    obs.previous_state = {0: []}
+    obs._get_ents = MagicMock(return_value={0: []})
+    assert obs._get_state_change() == {0: ([], [])}
+    obs._get_ents.assert_called()
+
+    obs.previous_state = {0: [vel1, pos1]}
+    obs._get_ents = MagicMock(return_value={0: [vel2, pos2]})
+    obs._get_components_change = MagicMock(return_value=([vel1, pos1], [vel2, pos2]))
+
+    assert obs._get_state_change() == {0: ([vel1, pos1], [vel2, pos2])}
+    obs._get_ents.assert_called_once()
+    obs._get_components_change.assert_called_with([vel1, pos1], [vel2, pos2])
+
+    obs.previous_state = {0: [], 1: [vel1, pos1]}
+    obs._get_ents = MagicMock(return_value={0: [vel2, pos2]})
+    obs._get_components_change = MagicMock(side_effect=lambda old, new : (old, new))
+
+    assert obs._get_state_change() == {0: ([], [vel2, pos2]), 1: ([vel1, pos1], [])}
+    obs._get_ents.assert_called_once()
+    obs._get_components_change.assert_called()

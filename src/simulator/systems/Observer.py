@@ -61,8 +61,6 @@ class ObserverProcessor(esper.Processor):
                     components_order[type(old[old_count])]
                     == components_order[type(new[new_count])]
                 ):
-                    print(old[old_count], new[new_count])
-                    print(old[old_count] == new[new_count])
                     if old[old_count] != new[new_count]:
                         old_removed.append(old[old_count])
                         new_added.append(new[new_count])
@@ -83,10 +81,28 @@ class ObserverProcessor(esper.Processor):
         return old_removed, new_added
 
     def _get_state_change(self) -> Dict[int, List[Component]]:
+        """Returns a dictionary mapping the entities which
+        changed with a tuple containing the removed components
+        and the added (or modified) components"""
+
+        state_change = {}
         new_state = self._get_ents()
-        for ent, components in new_state:
+        for ent in self.previous_state:
+            if not ent in new_state:
+                new_state[ent] = []
+
+        for ent, components in new_state.items():
             if ent in self.previous_state:
-                pass
+                print(self.previous_state[ent], components)
+                removed, added = self._get_components_change(
+                    self.previous_state[ent], components
+                )
+                state_change[ent] = (removed, added)
+            else:
+                state_change[ent] = ([], components)
+
+        print(state_change)
+        return state_change
 
     # event_store.put(
     #     EVENT(
