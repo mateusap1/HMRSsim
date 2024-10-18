@@ -237,3 +237,19 @@ def test_process():
             timestamp=42, changes=[ObserverChange(0, []), ObserverChange(1, [])]
         ),
     )
+    event_store.items = []
+
+    # Case 3: Two entities added
+    obs._get_state_change = MagicMock(return_value={0: [1, 2, 3], 1: [1]})
+    type(env).now = PropertyMock(return_value=42)
+
+    obs.process(kwargs)
+
+    obs._get_state_change.assert_called_once()
+    assert len(event_store.items) == 1
+    assert event_store.items[0] == EVENT(
+        ObserverTag,
+        ObserverPayload(
+            timestamp=42, changes=[ObserverChange(0, [1, 2, 3]), ObserverChange(1, [1])]
+        ),
+    )
