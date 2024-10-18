@@ -119,14 +119,16 @@ def test_get_state_change():
     obs = ObserverProcessor([Velocity, Position, Path, Map])
 
     vel1 = Velocity(x=0.0, y=0.0)
+    vel12 = Velocity(x=0.0, y=0.0)
     vel2 = Velocity(x=1.0, y=1.0)
 
     pos1 = Position(x=0.0, y=0.0)
+    pos12 = Position(x=0.0, y=0.0)
     pos2 = Position(x=1.0, y=1.0)
 
     # Case 1: Empty changes
-    obs.previous_state = {0: []}
-    assert obs._get_state_change({0: []}) == {0: []}
+    obs.previous_state = {}
+    assert obs._get_state_change({}) == {}
 
     # Case 2: One entity modified
     obs.previous_state = {0: [vel1, pos1]}
@@ -163,10 +165,10 @@ def test_get_state_change():
     obs._get_components_change.assert_called_once_with([vel1, pos1], [])
 
     # Case 4: New entity
-    obs.previous_state = {0: []}
+    obs.previous_state = {0: [pos1]}
     obs._get_components_change = MagicMock(return_value=[])
 
-    assert obs._get_state_change({0: [], 1: []}) == {0: [], 1: []}
+    assert obs._get_state_change({0: [pos1], 1: [vel1]}) == {1: [vel1]}
     obs._get_components_change.assert_called()
 
     # Case 5: Two entities modified
@@ -184,6 +186,14 @@ def test_get_state_change():
         1: [(vel2, ObserverChangeType.modified)],
     }
     obs._get_components_change.assert_called()
+
+    # Case 5: Entity no change
+    obs.previous_state = {0: [pos1], 1: [vel1]}
+    obs._get_components_change = MagicMock(return_value=[])
+
+    assert obs._get_state_change({0: [pos12], 1: [vel12]}) == {}
+    obs._get_components_change.assert_called()
+
 
 
 def test_process():

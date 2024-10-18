@@ -120,9 +120,12 @@ class ObserverProcessor(esper.Processor):
 
         for ent, components in new_state.items():
             if ent in self.previous_state:
-                state_change[ent] = self._get_components_change(
+                changes = self._get_components_change(
                     self.previous_state[ent], components
                 )
+                
+                if len(changes) > 0:
+                    state_change[ent] = changes
             else:
                 state_change[ent] = components
 
@@ -157,6 +160,3 @@ class ObserverProcessor(esper.Processor):
                     ),
                 )
             )
-        
-        
-        
