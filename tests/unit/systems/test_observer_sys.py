@@ -87,6 +87,13 @@ def test_get_components_change():
         (pos1, ObserverChangeType.removed),
     ]
 
+    old, new = [pos1], [vel1, pos2]
+    changes = obs._get_components_change(old, new)
+    assert changes == [
+        (vel1, ObserverChangeType.added),
+        (pos2, ObserverChangeType.modified),
+    ]
+
     old = [vel1, pos1, path1]
     new = [pos12, path12, map12]
     changes = obs._get_components_change(old, new)
@@ -101,33 +108,82 @@ def test_get_components_change():
     assert changes == [(pos2, ObserverChangeType.modified)]
 
 
-# def test_get_state_change():
-#     obs = ObserverProcessor([Velocity, Position, Path, Map])
+def test_get_state_change():
+    obs = ObserverProcessor([Velocity, Position, Path, Map])
 
-#     vel1 = Velocity(x=0.0, y=0.0)
-#     vel2 = Velocity(x=1.0, y=1.0)
+    vel1 = Velocity(x=0.0, y=0.0)
+    vel2 = Velocity(x=1.0, y=1.0)
 
-#     pos1 = Position(x=0.0, y=0.0)
-#     pos2 = Position(x=1.0, y=1.0)
+    pos1 = Position(x=0.0, y=0.0)
+    pos2 = Position(x=1.0, y=1.0)
 
-#     # Case 1: Empty changes
-#     obs.previous_state = {0: []}
-#     obs._get_ents = MagicMock(return_value={0: []})
-#     assert obs._get_state_change() == {0: ([], [])}
-#     obs._get_ents.assert_called()
+    # Case 1: Empty changes
+    obs.previous_state = {0: []}
+    obs._get_ents = MagicMock(return_value={0: []})
+    assert obs._get_state_change() == {0: []}
+    obs._get_ents.assert_called()
 
-#     obs.previous_state = {0: [vel1, pos1]}
-#     obs._get_ents = MagicMock(return_value={0: [vel2, pos2]})
-#     obs._get_components_change = MagicMock(return_value=([vel1, pos1], [vel2, pos2]))
+    # Case 2: One entity modified
+    obs.previous_state = {0: [vel1, pos1]}
+    obs._get_ents = MagicMock(return_value={0: [vel2, pos2]})
+    obs._get_components_change = MagicMock(
+        return_value=[
+            (vel2, ObserverChangeType.modified),
+            (pos2, ObserverChangeType.modified),
+        ]
+    )
 
-#     assert obs._get_state_change() == {0: ([vel1, pos1], [vel2, pos2])}
-#     obs._get_ents.assert_called_once()
-#     obs._get_components_change.assert_called_with([vel1, pos1], [vel2, pos2])
+    assert obs._get_state_change() == {
+        0: [
+            (vel2, ObserverChangeType.modified),
+            (pos2, ObserverChangeType.modified),
+        ]
+    }
+    obs._get_ents.assert_called_once()
+    obs._get_components_change.assert_called_with([vel1, pos1], [vel2, pos2])
 
-#     obs.previous_state = {0: [], 1: [vel1, pos1]}
-#     obs._get_ents = MagicMock(return_value={0: [vel2, pos2]})
-#     obs._get_components_change = MagicMock(side_effect=lambda old, new : (old, new))
+    # Case 3: Entity Removed
+    obs.previous_state = {0: [vel1, pos1]}
+    obs._get_ents = MagicMock(return_value={})
+    obs._get_components_change = MagicMock(
+        return_value=[
+            (vel1, ObserverChangeType.removed),
+            (pos1, ObserverChangeType.removed),
+        ]
+    )
 
-#     assert obs._get_state_change() == {0: ([], [vel2, pos2]), 1: ([vel1, pos1], [])}
-#     obs._get_ents.assert_called_once()
-#     obs._get_components_change.assert_called()
+    assert obs._get_state_change() == {
+        0: [
+            (vel1, ObserverChangeType.removed),
+            (pos1, ObserverChangeType.removed),
+        ]
+    }
+    obs._get_ents.assert_called_once()
+    obs._get_components_change.assert_called_once_with([vel1, pos1], [])
+
+    # Case 4: New entity
+    obs.previous_state = {0: []}
+    obs._get_ents = MagicMock(return_value={0: [], 1: []})
+    obs._get_components_change = MagicMock(return_value=[])
+
+    assert obs._get_state_change() == {0: [], 1: []}
+    obs._get_ents.assert_called_once()
+    obs._get_components_change.assert_called()
+
+    # Case 5: Two entities modified
+    obs.previous_state = {0: [pos1], 1: [vel1, pos1]}
+    obs._get_ents = MagicMock(return_value={0: [], 1: [vel2, pos1]})
+    obs._get_components_change = MagicMock(
+        side_effect=lambda old, new: (
+            [(pos1, ObserverChangeType.removed)]
+            if new == []
+            else [(vel2, ObserverChangeType.modified)]
+        )
+    )
+
+    assert obs._get_state_change() == {
+        0: [(pos1, ObserverChangeType.removed)],
+        1: [(vel2, ObserverChangeType.modified)],
+    }
+    obs._get_ents.assert_called_once()
+    obs._get_components_change.assert_called()

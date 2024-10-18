@@ -41,6 +41,7 @@ class ObserverProcessor(esper.Processor):
         # This algorithm assumes that the lists respects the
         # order defined here. This assumption holds true
         # depending on _get_ents.
+
         components_order = self._components_order()
 
         old_count = 0
@@ -86,13 +87,14 @@ class ObserverProcessor(esper.Processor):
     def _get_state_change(
         self,
     ) -> Dict[int, List[Tuple[Component, ObserverChangeType]]]:
-        """Returns a dictionary mapping the entities which
-        changed with a tuple containing the removed components
-        and the added (or modified) components"""
-
-        # We will consider
+        # In cases where the entity dissapeared, we always assume
+        # all of its components were removed. In reality, the
+        # entity could also have been destroyed.
 
         state_change = {}
+
+        # This is so we entities which dissapeared or had their
+        # components removed are also tracked.
         new_state = self._get_ents()
         for ent in self.previous_state:
             if not ent in new_state:
@@ -100,12 +102,11 @@ class ObserverProcessor(esper.Processor):
 
         for ent, components in new_state.items():
             if ent in self.previous_state:
-                removed, added = self._get_components_change(
+                state_change[ent] = self._get_components_change(
                     self.previous_state[ent], components
                 )
-                state_change[ent] = (removed, added)
             else:
-                state_change[ent] = ([], components)
+                state_change[ent] = components
 
         return state_change
 
