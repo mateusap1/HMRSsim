@@ -1,4 +1,12 @@
-from simulator.typehints.component_types import Component
+from simulator.typehints.component_types import (
+    Component,
+    EVENT,
+    ObserverTag,
+    ObserverPayload,
+    ObserverChange,
+    ObserverChangeType,
+)
+from simulator.typehints.dict_types import SystemArgs
 from typing import List, Dict, Type, Tuple
 
 import esper
@@ -30,7 +38,7 @@ class ObserverProcessor(esper.Processor):
 
     def _get_components_change(
         self, old: List[Component], new: List[Component]
-    ) -> Tuple[List[Component], List[Component]]:
+    ) -> List[Tuple[Component, ObserverChangeType]]:
         components_order = self._components_order()
 
         old_count = 0
@@ -39,8 +47,7 @@ class ObserverProcessor(esper.Processor):
         new_count = 0
         new_terminated = False
 
-        new_added = []
-        old_removed = []
+        changes: List[Tuple[Component, ObserverChangeType]] = []
         while not old_terminated or not new_terminated:
             if old_count == len(old):
                 old_terminated = True
@@ -51,10 +58,10 @@ class ObserverProcessor(esper.Processor):
                 break
 
             if old_terminated:
-                new_added.append(new[new_count])
+                changes.append((new[new_count], ObserverChangeType.added))
                 new_count += 1
             elif new_terminated:
-                old_removed.append(old[old_count])
+                changes.append((old[old_count], ObserverChangeType.removed))
                 old_count += 1
             else:
                 if (
@@ -62,8 +69,7 @@ class ObserverProcessor(esper.Processor):
                     == components_order[type(new[new_count])]
                 ):
                     if old[old_count] != new[new_count]:
-                        old_removed.append(old[old_count])
-                        new_added.append(new[new_count])
+                        changes.append((new[new_count], ObserverChangeType.modified))
 
                     new_count += 1
                     old_count += 1
@@ -72,15 +78,15 @@ class ObserverProcessor(esper.Processor):
                         components_order[type(old[old_count])]
                         < components_order[type(new[new_count])]
                     ):
-                        old_removed.append(old[old_count])
+                        changes.append((old[old_count], ObserverChangeType.removed))
                         old_count += 1
                     else:
-                        new_added.append(new[new_count])
+                        changes.append((new[new_count], ObserverChangeType.added))
                         new_count += 1
 
-        return old_removed, new_added
+        return changes
 
-    def _get_state_change(self) -> Dict[int, List[Component]]:
+    def _get_state_change(self) -> Dict[int, Tuple[List[Component], List[Component]]]:
         """Returns a dictionary mapping the entities which
         changed with a tuple containing the removed components
         and the added (or modified) components"""
@@ -93,7 +99,6 @@ class ObserverProcessor(esper.Processor):
 
         for ent, components in new_state.items():
             if ent in self.previous_state:
-                print(self.previous_state[ent], components)
                 removed, added = self._get_components_change(
                     self.previous_state[ent], components
                 )
@@ -101,12 +106,19 @@ class ObserverProcessor(esper.Processor):
             else:
                 state_change[ent] = ([], components)
 
-        print(state_change)
         return state_change
 
-    # event_store.put(
-    #     EVENT(
-    #         EndOfPathTag,
-    #         EndOfPathPayload(ent, str(env.now), path=path.points),
-    #     )
-    # )
+    def process(self, kwargs: SystemArgs):
+        event_store = self.get_event_store(kwargs)
+        env = self.get_environment(kwargs)
+
+        state_change = self._get_state_change()
+        for ent, components in state_change.items():
+            pass
+            # event_store.put(
+            #     EVENT(
+            #         str(env.now),
+            #         ObserverTag,
+            #         ObserverPayload(ent, str(env.now), path=path.points),
+            #     )
+            # )
