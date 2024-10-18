@@ -7,16 +7,35 @@ from simulator.typehints.component_types import (
     ObserverChangeType,
 )
 from simulator.typehints.dict_types import SystemArgs
+
 from typing import List, Dict, Type, Tuple
 from collections import defaultdict
+
+from simpy import FilterStore, Environment
 
 import esper
 
 
 class ObserverProcessor(esper.Processor):
     def __init__(self, components: List[Type[Component]]):
+        super().__init__() # Is this necessary?
+
         self.components = components
         self.previous_state = {}
+
+    def _get_event_store(self, kwargs: SystemArgs) -> FilterStore:
+        event_store = kwargs.get("EVENT_STORE", None)
+        if event_store is None:
+            raise Exception("Can't find Event Store.")
+
+        return event_store
+
+    def _get_environment(self, kwargs: SystemArgs) -> Environment:
+        env = kwargs.get("ENV", None)
+        if env is None:
+            raise Exception("Can't find Environment.")
+
+        return env
 
     def _components_order(self) -> Dict[Type[Component], int]:
         components_order = {}
@@ -111,8 +130,8 @@ class ObserverProcessor(esper.Processor):
         return state_change
 
     def process(self, kwargs: SystemArgs):
-        event_store = self.get_event_store(kwargs)
-        env = self.get_environment(kwargs)
+        event_store = self._get_event_store(kwargs)
+        env = self._get_environment(kwargs)
 
         state_change = self._get_state_change()
         for ent, components in state_change.items():

@@ -11,6 +11,7 @@ from unittest.mock import MagicMock
 
 
 import esper
+import simpy
 
 
 def test_observer_get_ents():
@@ -187,3 +188,31 @@ def test_get_state_change():
     }
     obs._get_ents.assert_called_once()
     obs._get_components_change.assert_called()
+
+
+def test_process():
+    env = simpy.Environment()
+    event_store = simpy.FilterStore(env)
+
+    obs = ObserverProcessor([Velocity, Position, Path, Map])
+
+    vel1 = Velocity(x=0.0, y=0.0)
+    vel2 = Velocity(x=1.0, y=1.0)
+
+    pos1 = Position(x=0.0, y=0.0)
+    pos2 = Position(x=1.0, y=1.0)
+
+    kwargs = {"foo": "bar"}
+
+    # Case 1: No changes
+    # entity = world.create_entity(velocity, position, path)
+    obs._get_event_store = MagicMock(return_value=event_store)
+    obs._get_environment = MagicMock(return_value=env)
+    obs._get_state_change = MagicMock(return_value={})
+
+    obs.process(kwargs)
+
+    obs._get_event_store.assert_called_once_with(kwargs)
+    obs._get_environment.assert_called_once_with(kwargs)
+    obs._get_state_change.assert_called_once()
+    assert len(event_store.items) == 0
