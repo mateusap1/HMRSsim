@@ -5,9 +5,15 @@ from simulator.components.Position import Position
 from simulator.components.Path import Path
 from simulator.components.Map import Map
 
-from simulator.typehints.component_types import ObserverChangeType
+from simulator.typehints.component_types import (
+    EVENT,
+    ObserverPayload,
+    ObserverChange,
+    ObserverTag,
+    ObserverChangeType,
+)
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock
 
 
 import esper
@@ -203,11 +209,11 @@ def test_process():
     pos2 = Position(x=1.0, y=1.0)
 
     kwargs = {"foo": "bar"}
+    obs._get_event_store = MagicMock(return_value=event_store)
+    obs._get_environment = MagicMock(return_value=env)
 
     # Case 1: No changes
     # entity = world.create_entity(velocity, position, path)
-    obs._get_event_store = MagicMock(return_value=event_store)
-    obs._get_environment = MagicMock(return_value=env)
     obs._get_state_change = MagicMock(return_value={})
 
     obs.process(kwargs)
@@ -216,3 +222,18 @@ def test_process():
     obs._get_environment.assert_called_once_with(kwargs)
     obs._get_state_change.assert_called_once()
     assert len(event_store.items) == 0
+
+    # Case 2: Two entities added
+    obs._get_state_change = MagicMock(return_value={0: [], 1: []})
+    type(env).now = PropertyMock(return_value=42)
+
+    obs.process(kwargs)
+
+    obs._get_state_change.assert_called_once()
+    assert len(event_store.items) == 1
+    assert event_store.items[0] == EVENT(
+        ObserverTag,
+        ObserverPayload(
+            timestamp=42, changes=[ObserverChange(0, []), ObserverChange(1, [])]
+        ),
+    )

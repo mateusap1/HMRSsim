@@ -18,7 +18,7 @@ import esper
 
 class ObserverProcessor(esper.Processor):
     def __init__(self, components: List[Type[Component]]):
-        super().__init__() # Is this necessary?
+        super().__init__()  # Is this necessary?
 
         self.components = components
         self.previous_state = {}
@@ -134,12 +134,16 @@ class ObserverProcessor(esper.Processor):
         env = self._get_environment(kwargs)
 
         state_change = self._get_state_change()
-        for ent, components in state_change.items():
-            pass
-            # event_store.put(
-            #     EVENT(
-            #         str(env.now),
-            #         ObserverTag,
-            #         ObserverPayload(ent, str(env.now), path=path.points),
-            #     )
-            # )
+        if len(state_change) > 0:
+            event_store.put(
+                EVENT(
+                    ObserverTag,
+                    ObserverPayload(
+                        env.now,
+                        [
+                            ObserverChange(ent, change)
+                            for ent, change in state_change.items()
+                        ],
+                    ),
+                )
+            )
