@@ -40,17 +40,17 @@ def always_continue_requirment(_):
 def test_process_event():
     event = EVENT(ObserverTag, ObserverPayload(timestamp=0, changes=[]))
 
-    tester = TesterDESProcessor([always_succeed_requirment])
+    tester = TesterDESProcessor([("always success", always_succeed_requirment)])
     tester._process_event(event)
     assert tester.requirement_counter == 1
     assert tester.state == TesterState.RUNNING
 
-    tester = TesterDESProcessor([always_fail_requirment])
+    tester = TesterDESProcessor([("always fail", always_fail_requirment)])
     tester._process_event(event)
     assert tester.requirement_counter == 0
     assert tester.state == TesterState.FAILURE
 
-    tester = TesterDESProcessor([always_continue_requirment])
+    tester = TesterDESProcessor([("always continue", always_continue_requirment)])
     tester._process_event(event)
     assert tester.requirement_counter == 0
     assert tester.state == TesterState.RUNNING
@@ -132,7 +132,6 @@ def test_near_position_requirement():
     )
     assert req.requirement(payload) == RequireState.CONTINUE
     req._near_position.assert_not_called()
-
 
     # Case 6: Changes in other entity
     req = NearPosition(0, (5.0, 5.0), 5.0)

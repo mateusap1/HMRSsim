@@ -168,7 +168,9 @@ def test_get_state_change():
     obs.previous_state = {0: [pos1]}
     obs._get_components_change = MagicMock(return_value=[])
 
-    assert obs._get_state_change({0: [pos1], 1: [vel1]}) == {1: [vel1]}
+    assert obs._get_state_change({0: [pos1], 1: [vel1]}) == {
+        1: [(vel1, ObserverChangeType.added)]
+    }
     obs._get_components_change.assert_called()
 
     # Case 5: Two entities modified
@@ -193,7 +195,6 @@ def test_get_state_change():
 
     assert obs._get_state_change({0: [pos12], 1: [vel12]}) == {}
     obs._get_components_change.assert_called()
-
 
 
 def test_process():

@@ -312,16 +312,7 @@ def mock_map(tmp_path):
     map_file.write_text(map_content)
 
 
-def is_close_enough(
-    actual: Tuple[float, float], expected: Tuple[float, float], tolerance: float
-):
-    return (
-        math.sqrt((actual[0] - expected[0]) ** 2 + (actual[1] - expected[1]) ** 2)
-        <= tolerance
-    )
-
-
-def test_hospital_simulation_integration(caplog, tmp_path, mock_map):
+def test_hospital_simulation_integration(tmp_path, mock_map):
     sim, tester = setup_simulation(
         {
             "context": ".",
@@ -331,7 +322,7 @@ def test_hospital_simulation_integration(caplog, tmp_path, mock_map):
             "duration": 10,
             "verbose": 20,
         },
-        [Position],
+        [Position, Inventory],
     )
 
     # Run the simulation with a timeout
