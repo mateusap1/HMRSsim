@@ -42,21 +42,13 @@ class ObserverProcessor(esper.Processor):
         components_order = self._components_order()
 
         old_count = 0
-        old_terminated = False
+        old_terminated = len(old) == 0
 
         new_count = 0
-        new_terminated = False
+        new_terminated = len(new) == 0
 
         changes: List[Tuple[Component, ObserverChangeType]] = []
-        while not old_terminated or not new_terminated:
-            if old_count == len(old):
-                old_terminated = True
-            if new_count == len(new):
-                new_terminated = True
-
-            if old_terminated and new_terminated:
-                break
-
+        while (not old_terminated) or (not new_terminated):
             if old_terminated:
                 changes.append((new[new_count], ObserverChangeType.added))
                 new_count += 1
@@ -83,13 +75,18 @@ class ObserverProcessor(esper.Processor):
                     else:
                         changes.append((new[new_count], ObserverChangeType.added))
                         new_count += 1
+            
+            old_terminated = old_count == len(old)
+            new_terminated = new_count == len(new)
 
         return changes
 
-    def _get_state_change(self) -> Dict[int, Tuple[List[Component], List[Component]]]:
+    def _get_state_change(self) -> Dict[int, List[Tuple[Component, ObserverChangeType]]]:
         """Returns a dictionary mapping the entities which
         changed with a tuple containing the removed components
         and the added (or modified) components"""
+
+        # We will consider
 
         state_change = {}
         new_state = self._get_ents()

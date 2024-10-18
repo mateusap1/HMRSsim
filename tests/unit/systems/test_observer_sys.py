@@ -110,6 +110,7 @@ def test_get_components_change():
 #     pos1 = Position(x=0.0, y=0.0)
 #     pos2 = Position(x=1.0, y=1.0)
 
+#     # Case 1: Empty changes
 #     obs.previous_state = {0: []}
 #     obs._get_ents = MagicMock(return_value={0: []})
 #     assert obs._get_state_change() == {0: ([], [])}
