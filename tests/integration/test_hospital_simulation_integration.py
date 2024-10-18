@@ -4,7 +4,7 @@ import math
 import sys
 import re
 
-from typing import List
+from typing import List, Tuple
 
 from simulator.main import Simulator, ConfigFormat
 
@@ -78,13 +78,6 @@ def setup_simulation(config: ConfigFormat, observer_components: List[Component])
     script.error_handlers = error_handlers
 
     return simulator, [script], watcher
-
-
-def is_close_enough(actual, expected, tolerance=15):
-    return (
-        math.sqrt((actual[0] - expected[0]) ** 2 + (actual[1] - expected[1]) ** 2)
-        <= tolerance
-    )
 
 
 @pytest.fixture
@@ -292,31 +285,24 @@ def mock_map(tmp_path):
     map_file.write_text(map_content)
 
 
-# @pytest.fixture
-# def simulator(config_path, mock_map):
-#     sys.argv = [sys.argv[0], config_path]
-#     simulator, objects = setup()
-#     return simulator, objects
+def is_close_enough(
+    actual: Tuple[float, float], expected: Tuple[float, float], tolerance: float
+):
+    return (
+        math.sqrt((actual[0] - expected[0]) ** 2 + (actual[1] - expected[1]) ** 2)
+        <= tolerance
+    )
 
 
-def parse_script_logs(logs):
-    parsed_logs = []
-    for log in logs:
-        match = re.match(
-            r"\[(\d+(?:\.\d+)?)\] Execute instruction (\w+) (\[.*?\])\. Current state (States\.\w+)",
-            log,
-        )
-        if match:
-            time, instruction, args, state = match.groups()
-            parsed_logs.append(
-                {
-                    "time": float(time),
-                    "instruction": instruction,
-                    "args": eval(args),
-                    "state": getattr(States, state.split(".")[1]),
-                }
-            )
-    return parsed_logs
+# def achieved_position(
+#     watcher: WatcherDESProcessor,
+#     entity: int,
+#     position: Tuple[float, float],
+#     tolerance: float = 5,
+# ) -> int:
+#     for i, obs in enumerate(watcher.observer_memory):
+#         for change in obs.changes:
+
 
 
 def test_hospital_simulation_integration(caplog, tmp_path, mock_map):
@@ -329,7 +315,7 @@ def test_hospital_simulation_integration(caplog, tmp_path, mock_map):
             "duration": 10,
             "verbose": 20,
         },
-        [Inventory],
+        [Position, Inventory],
     )
     script = objects[0]
 
@@ -341,70 +327,6 @@ def test_hospital_simulation_integration(caplog, tmp_path, mock_map):
     assert sim.ENV.now > 0, "Simulation did not run"
 
     print(watcher.observer_memory)
-
-    # Parse and check robot's script logs
-    parsed_logs = parse_script_logs(script.logs)
-
-    # expected_instructions = [
-    #     ("Go", ["medRoom"]),
-    #     ("Grab", ["medicine"]),
-    #     ("Go", ["patientRoom"]),
-    #     ("Drop", ["medicine"]),
-    #     ("Go", ["robotHome"]),
-    # ]
-
-    # # Print detailed information about executed instructions
-    # print("Executed instructions:")
-    # for log in parsed_logs:
-    #     print(
-    #         f"Time: {log['time']}, Instruction: {log['instruction']}, Args: {log['args']}, State: {log['state']}"
-    #     )
-
-    # assert len(parsed_logs) == len(
-    #     expected_instructions
-    # ), f"Expected {len(expected_instructions)} instructions, got {len(parsed_logs)}"
-
-    # for i, (expected_instruction, expected_args) in enumerate(expected_instructions):
-    #     if i < len(parsed_logs):
-    #         assert (
-    #             parsed_logs[i]["instruction"] == expected_instruction
-    #         ), f"Instruction {i} should be {expected_instruction}, got {parsed_logs[i]['instruction']}"
-    #         assert (
-    #             parsed_logs[i]["args"] == expected_args
-    #         ), f"Arguments for instruction {i} should be {expected_args}, got {parsed_logs[i]['args']}"
-    #         assert (
-    #             parsed_logs[i]["state"] == States.BLOCKED
-    #         ), f"State for instruction {i} should be BLOCKED, got {parsed_logs[i]['state']}"
-    #     else:
-    #         pytest.fail(
-    #             f"Instruction {i} ({expected_instruction} {expected_args}) was not executed"
-    #         )
-
-    # # Check that times are increasing
-    # times = [log["time"] for log in parsed_logs]
-    # assert times == sorted(
-    #     times
-    # ), "Instructions were not executed in order of increasing time"
-
-    # # Verify that the script completed successfully
-    # assert (
-    #     script.state == States.DONE
-    # ), f"Script did not complete successfully. Final state: {script.state}"
-
-    # # Verify robot's final position
-    # robot_entity = sim.objects[0][0]
-    # robot_position = sim.world.component_for_entity(robot_entity, Position)
-    # robot_home = (
-    #     500.0,
-    #     80.0,
-    # )  # Updated based on the POI in the simulation loading output
-
-    # assert is_close_enough(
-    #     robot_position.center, robot_home
-    # ), f"Robot did not return close enough to its home position. Expected: {robot_home}, Actual: {robot_position.center}"
-
-    # # Print final simulation time
-    # print(f"Final simulation time: {sim.ENV.now}")
 
 
 if __name__ == "__main__":

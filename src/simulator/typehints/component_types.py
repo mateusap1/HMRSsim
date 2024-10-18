@@ -47,5 +47,5 @@ ObserverChange = NamedTuple(
     [("ent", int), ("changes", List[Tuple[Component, ObserverChangeType]])],
 )
 ObserverPayload = NamedTuple(
-    "ObserverPayload", [("timestamp", int), ("changes", List[ObserverChange])]
+    "ObserverPayload", [("timestamp", float), ("changes", List[ObserverChange])]
 )

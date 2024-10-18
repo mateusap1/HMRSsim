@@ -3,11 +3,14 @@ from simulator.typehints.component_types import ObserverTag, EVENT
 
 from simpy import FilterStore, Environment
 
+from typing import List
+from simulator.typehints.component_types import ObserverPayload
+
 
 class WatcherDESProcessor:
 
     def __init__(self):
-        self.observer_memory = []
+        self.observer_memory: List[ObserverPayload] = []
 
     def process(self, kwargs: SystemArgs):
         event_store = self._get_event_store(kwargs)
