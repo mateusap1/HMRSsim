@@ -130,6 +130,14 @@ class ObserverProcessor(esper.Processor):
         return state_change
 
     def process(self, kwargs: SystemArgs):
+        # For improved performance, maybe make this a DES like the
+        # Seer Plugin, maybe it is not necessary to check for changes
+        # at every tick.
+
+        # Also, create Observable component, and only look at entities
+        # with Observable component instead of passing observed
+        # components as an argument
+
         event_store = self._get_event_store(kwargs)
         env = self._get_environment(kwargs)
 
