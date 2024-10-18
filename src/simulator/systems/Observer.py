@@ -8,6 +8,7 @@ from simulator.typehints.component_types import (
 )
 from simulator.typehints.dict_types import SystemArgs
 from typing import List, Dict, Type, Tuple
+from collections import defaultdict
 
 import esper
 
@@ -25,20 +26,21 @@ class ObserverProcessor(esper.Processor):
         return components_order
 
     def _get_ents(self) -> Dict[int, List[Component]]:
-        ents = {}
-        for comptype in self.components:
-            world_ents = self.world.get_component(comptype)
-            for ent, component in world_ents:
-                if ent in ents:
-                    ents[ent].append(component)
-                else:
-                    ents[ent] = [component]
+        # This must respect the self.components order.
 
-        return ents
+        ents = defaultdict(list)
+        for comptype in self.components:
+            for ent, component in self.world.get_component(comptype):
+                ents[ent].append(component)
+
+        return dict(ents)
 
     def _get_components_change(
         self, old: List[Component], new: List[Component]
     ) -> List[Tuple[Component, ObserverChangeType]]:
+        # This algorithm assumes that the lists respects the
+        # order defined here. This assumption holds true
+        # depending on _get_ents.
         components_order = self._components_order()
 
         old_count = 0
@@ -75,13 +77,15 @@ class ObserverProcessor(esper.Processor):
                     else:
                         changes.append((new[new_count], ObserverChangeType.added))
                         new_count += 1
-            
+
             old_terminated = old_count == len(old)
             new_terminated = new_count == len(new)
 
         return changes
 
-    def _get_state_change(self) -> Dict[int, List[Tuple[Component, ObserverChangeType]]]:
+    def _get_state_change(
+        self,
+    ) -> Dict[int, List[Tuple[Component, ObserverChangeType]]]:
         """Returns a dictionary mapping the entities which
         changed with a tuple containing the removed components
         and the added (or modified) components"""
