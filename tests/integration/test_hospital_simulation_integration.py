@@ -18,7 +18,7 @@ import simulator.systems.ClawDESProcessor as ClawProcessor
 import simulator.systems.ScriptEventsDES as ScriptSystem
 import simulator.systems.GotoDESProcessor as NavigationSystem
 from simulator.systems.Observer import ObserverProcessor
-from simulator.systems.Watcher import WatcherDESProcessor
+from simulator.systems.Tester import TesterDESProcessor, NearPosition, TesterState
 
 from simulator.components.Script import Script, States
 from simulator.components.Inventory import Inventory
@@ -30,6 +30,14 @@ from simulator.typehints.component_types import Component
 def setup_simulation(config: ConfigFormat, observer_components: List[Component]):
     # Create a simulation with config
     simulator = Simulator(config)
+
+    robot_ent = None
+    for ent, ent_type in simulator.entities:
+        if ent_type == "robot":
+            robot_ent = ent
+
+    if robot_ent is None:
+        raise ValueError("Could not find robot entity.")
 
     # Some simulator objects
     width, height = simulator.window_dimensions
@@ -50,11 +58,30 @@ def setup_simulation(config: ConfigFormat, observer_components: List[Component])
         PathProcessor(),
     ]
 
-    watcher = WatcherDESProcessor()
+    med_room = (514.5, 240.0)
+    patient_room = (70.0, 220.0)
+    robot_home = (495.0, 75.0)
+    tester = TesterDESProcessor(
+        [
+            (
+                "Start at robot home",
+                NearPosition(robot_ent, robot_home, 15.0).requirement,
+            ),
+            ("Go to med room", NearPosition(robot_ent, med_room, 15.0).requirement),
+            (
+                "Go to patient room",
+                NearPosition(robot_ent, patient_room, 15.0).requirement,
+            ),
+            (
+                "Return to robot home",
+                NearPosition(robot_ent, robot_home, 15.0).requirement,
+            ),
+        ]
+    )
 
     # Defines DES processors
     des_processors = [
-        (watcher.process,),
+        (tester.process,),
         (ClawProcessor.process,),
         (ObjectManager.process,),
         (energySystem.process,),
@@ -77,7 +104,7 @@ def setup_simulation(config: ConfigFormat, observer_components: List[Component])
     script = simulator.world.component_for_entity(robot, Script)
     script.error_handlers = error_handlers
 
-    return simulator, [script], watcher
+    return simulator, tester
 
 
 @pytest.fixture
@@ -294,19 +321,8 @@ def is_close_enough(
     )
 
 
-# def achieved_position(
-#     watcher: WatcherDESProcessor,
-#     entity: int,
-#     position: Tuple[float, float],
-#     tolerance: float = 5,
-# ) -> int:
-#     for i, obs in enumerate(watcher.observer_memory):
-#         for change in obs.changes:
-
-
-
 def test_hospital_simulation_integration(caplog, tmp_path, mock_map):
-    sim, objects, watcher = setup_simulation(
+    sim, tester = setup_simulation(
         {
             "context": ".",
             "map": str(tmp_path / "hospital_map.xml"),
@@ -315,18 +331,15 @@ def test_hospital_simulation_integration(caplog, tmp_path, mock_map):
             "duration": 10,
             "verbose": 20,
         },
-        [Position, Inventory],
+        [Position],
     )
-    script = objects[0]
 
     # Run the simulation with a timeout
-    # run_simulation_with_timeout(sim)
     sim.run()
+    tester.finish()
+    tester.print_state()
 
-    # Verify that the simulation completed
-    assert sim.ENV.now > 0, "Simulation did not run"
-
-    print(watcher.observer_memory)
+    assert tester.state == TesterState.SUCCESS
 
 
 if __name__ == "__main__":

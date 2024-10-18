@@ -60,7 +60,9 @@ class NearPosition:
 class TesterDESProcessor:
     __test__ = False
 
-    def __init__(self, requirements: List[Callable[[ObserverPayload], RequireState]]):
+    def __init__(
+        self, requirements: List[Tuple[str, Callable[[ObserverPayload], RequireState]]]
+    ):
         # A requirement is a function which expects ObserverPayload
         # and returns either SUCCESS, CONTINUE or FAIL.
 
@@ -75,6 +77,19 @@ class TesterDESProcessor:
         self.requirements = requirements
         self.requirement_counter = 0
         self.state: TesterState = TesterState.RUNNING
+
+    def print_state(self):
+        if self.state == TesterState.RUNNING:
+            print("Robot is still running...")
+        else:
+            for i, (label, _) in enumerate(self.requirements):
+                status_label = "SUCCESS" if i < self.requirement_counter else "FAILURE"
+                print(f"{status_label} | {label}")
+
+            if self.state == TesterState.SUCCESS:
+                print("Robot met requirements successfully.")
+            else:
+                print(f"Robot requirements failed.")
 
     def finish(self):
         if self.state == TesterState.RUNNING:
@@ -94,7 +109,9 @@ class TesterDESProcessor:
             self._process_event(event)
 
     def _process_event(self, event: EVENT):
-        requirement_result = self.requirements[self.requirement_counter](event.payload)
+        requirement_result = self.requirements[self.requirement_counter][1](
+            event.payload
+        )
         if requirement_result == RequireState.SUCCESS:
             self.requirement_counter += 1
         elif requirement_result == RequireState.FAILURE:

@@ -12,6 +12,7 @@ from typing import List, Dict, Type, Tuple
 from collections import defaultdict
 
 from simpy import FilterStore, Environment
+from copy import deepcopy
 
 import esper
 
@@ -127,7 +128,7 @@ class ObserverProcessor(esper.Processor):
                 if len(changes) > 0:
                     state_change[ent] = changes
             else:
-                state_change[ent] = components
+                state_change[ent] = [(c, ObserverChangeType.added) for c in components]
 
         return state_change
 
@@ -145,7 +146,6 @@ class ObserverProcessor(esper.Processor):
 
         new_state = self._get_ents()
         state_change = self._get_state_change(new_state)
-        self.previous_state = new_state
 
         if len(state_change) > 0:
             event_store.put(
@@ -160,3 +160,7 @@ class ObserverProcessor(esper.Processor):
                     ),
                 )
             )
+
+        # Not very good performance, maybe improve this later
+        self.previous_state = deepcopy(new_state)
+        
