@@ -7,6 +7,7 @@ from simulator.typehints.component_types import (
 )
 
 from simulator.components.Position import Position
+from simulator.components.Inventory import Inventory
 
 from simpy import FilterStore, Environment
 
@@ -53,6 +54,51 @@ class NearPosition:
                     ]:
                         if self._near_position((component.x, component.y)):
                             return RequireState.SUCCESS
+
+        return RequireState.CONTINUE
+
+
+class ChangedInventory:
+
+    def __init__(self, ent: int, object_name: str):
+        self.ent = ent
+        self.object_name = object_name
+
+    def added_object_requirement(self, payload: ObserverPayload):
+        for ent, changes in payload.changes:
+            if ent == self.ent:
+                for component, change_type in changes:
+                    if isinstance(component, Inventory):
+                        if (
+                            change_type
+                            in [ObserverChangeType.added, ObserverChangeType.modified]
+                            and self.object_name in component.objects
+                        ):
+                            return RequireState.SUCCESS
+
+        return RequireState.CONTINUE
+
+    def removed_object_requirement(self, payload: ObserverPayload):
+        for ent, changes in payload.changes:
+            if ent == self.ent:
+                for component, change_type in changes:
+                    if isinstance(component, Inventory):
+                        if (
+                            change_type
+                            in [ObserverChangeType.removed, ObserverChangeType.modified]
+                            and self.object_name not in component.objects
+                        ):
+                            return RequireState.SUCCESS
+
+        return RequireState.CONTINUE
+
+    def requirement(self, payload: ObserverPayload) -> RequireState:
+        for ent, changes in payload.changes:
+            if ent == self.ent:
+                for component, change_type in changes:
+                    if isinstance(component, Inventory):
+                        print(component, change_type)
+                        return RequireState.SUCCESS
 
         return RequireState.CONTINUE
 

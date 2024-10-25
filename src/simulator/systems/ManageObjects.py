@@ -67,6 +67,7 @@ def remove_entity(obj_name):
         return False, 'This object does not belong to the global_inventory.'
     ent = global_inventory[obj_name]
     del global_inventory[obj_name]
+    print(f"Removed {obj_name} from global inventory", global_inventory)
     __world.delete_entity(ent)
     return True, ''
 

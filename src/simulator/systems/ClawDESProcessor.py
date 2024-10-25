@@ -33,18 +33,23 @@ class RosClawService(RosActionServer):
     def execute_goal(self, succeed=False, msg=None):
         pass
 
+
 class ClawOps(Enum):
-    GRAB = 'Grab'
-    DROP = 'Drop'
+    GRAB = "Grab"
+    DROP = "Drop"
 
 
-GRAB_ClawPayload = NamedTuple('ClawGrabPayload', op=ClawOps, obj=str, me=int, ros_service=RosClawService)
-RESPONSE_ClawPayload = NamedTuple('ClawOperationDone', op=ClawOps, ent=int, success=bool, msg=str)
-ClawTag = 'ClawAction'
-ClawDoneTag = 'ClawAttemptComplete'
+GRAB_ClawPayload = NamedTuple(
+    "ClawGrabPayload", op=ClawOps, obj=str, me=int, ros_service=RosClawService
+)
+RESPONSE_ClawPayload = NamedTuple(
+    "ClawOperationDone", op=ClawOps, ent=int, success=bool, msg=str
+)
+ClawTag = "ClawAction"
+ClawDoneTag = "ClawAttemptComplete"
 
-GrabInstructionTag = 'Grab'
-DropInstructionTag = 'Drop'
+GrabInstructionTag = "Grab"
+DropInstructionTag = "Drop"
 
 _EVENT_STORE: FilterStore
 _WORLD: World
@@ -56,20 +61,24 @@ def process(kwargs: SystemArgs):
     global _WORLD
     global _ENV
 
-    _EVENT_STORE = kwargs.get('EVENT_STORE', None)
-    _WORLD = kwargs.get('WORLD', None)
-    _ENV = kwargs.get('ENV', None)
+    _EVENT_STORE = kwargs.get("EVENT_STORE", None)
+    _WORLD = kwargs.get("WORLD", None)
+    _ENV = kwargs.get("ENV", None)
     logger = logging.getLogger(__name__)
     if _EVENT_STORE is None:
         raise Exception("Can't find eventStore")
     while True:
         event = yield _EVENT_STORE.get(lambda ev: ev.type == ClawTag)
         op = event.payload.op
-        logger.debug(f'Claw Received op {op}')
+        logger.debug(f"Claw Received op {op}")
         if op == ClawOps.GRAB:
-            yield from pick_object(event.payload.obj, event.payload.me, event.payload.ros_service)
+            yield from pick_object(
+                event.payload.obj, event.payload.me, event.payload.ros_service
+            )
         elif op == ClawOps.DROP:
-            yield from drop_object(event.payload.obj, event.payload.me, event.payload.ros_service)
+            yield from drop_object(
+                event.payload.obj, event.payload.me, event.payload.ros_service
+            )
 
 
 def pick_object(obj_name: str, me: int, ros_service: RosClawService = None):
@@ -77,13 +86,13 @@ def pick_object(obj_name: str, me: int, ros_service: RosClawService = None):
     pos = _WORLD.component_for_entity(me, Position)
     claw = _WORLD.component_for_entity(me, Claw)
     success: bool = False
-    msg: str = f'Object {obj_name} not found.'
+    msg: str = f"Object {obj_name} not found."
     # Squares are faster to create and test collision against.
     points = [
         (pos.center[0] - claw.max_range // 2, pos.center[1] - claw.max_range // 2),
         (pos.center[0] + claw.max_range // 2, pos.center[1] - claw.max_range // 2),
         (pos.center[0] + claw.max_range // 2, pos.center[1] + claw.max_range // 2),
-        (pos.center[0] - claw.max_range // 2, pos.center[1] + claw.max_range // 2)
+        (pos.center[0] - claw.max_range // 2, pos.center[1] + claw.max_range // 2),
     ]
     claw_col = Collidable([(pos.center, points)])
     # For every pickable component, see if it's within range
@@ -95,28 +104,34 @@ def pick_object(obj_name: str, me: int, ros_service: RosClawService = None):
                     if pick.weight <= claw.max_weight:
                         # Take the object
                         reply_channel = Store(_ENV)
-                        payload = ObjectManager.GrabPayload(obj_name, ObjectManager.ObjectManagerOps.REMOVE,
-                                                            reply_channel)
+                        payload = ObjectManager.GrabPayload(
+                            obj_name,
+                            ObjectManager.ObjectManagerOps.REMOVE,
+                            reply_channel,
+                        )
                         event = EVENT(ObjectManager.ManagerTag, payload)
                         _EVENT_STORE.put(event)
                         # Wait for reply
                         response = yield reply_channel.get()
-                        if response.get('success', False):
+                        if response.get("success", False):
                             success = True
                             # Add removed component to my inventory
                             if not _WORLD.has_component(me, Inventory):
                                 _WORLD.add_component(me, Inventory())
                             inventory = _WORLD.component_for_entity(me, Inventory)
                             inventory.objects[obj_name] = pick.skeleton
-                            msg = f'Picked {obj_name}. My inventory: {inventory.objects}'
+                            print(f"Added {obj_name} to global inventory", inventory)
+                            msg = (
+                                f"Picked {obj_name}. My inventory: {inventory.objects}"
+                            )
                         else:
                             success = False
-                            msg = response.get('msg', '')
+                            msg = response.get("msg", "")
                     else:
-                        msg = f'Pickable {obj_name} too heavy. Max weight:{claw.max_weight}. Object weight: {pick.weight}'
+                        msg = f"Pickable {obj_name} too heavy. Max weight:{claw.max_weight}. Object weight: {pick.weight}"
                         success = False
                 else:
-                    msg = f'Pickable {obj_name} not within claw range!'
+                    msg = f"Pickable {obj_name} not within claw range!"
                     success = False
     if ros_service is not None:
         ros_service.execute_goal(success, msg)
@@ -136,7 +151,7 @@ def drop_object(obj_name, me, ros_service: RosClawService = None):
     success: bool = False
     msg: str = "Something went wrong"
     if skeleton is None:
-        msg = f'Not holding object {obj_name}'
+        msg = f"Not holding object {obj_name}"
     else:
         reply_channel = Store(_ENV)
         drop_offset = (pos.center[0], pos.center[1] + pos.h)
@@ -146,14 +161,14 @@ def drop_object(obj_name, me, ros_service: RosClawService = None):
             skeleton,
             drop_offset,
             reply_channel,
-            pos.sector
+            pos.sector,
         )
         _EVENT_STORE.put(EVENT(ObjectManager.ManagerTag, drop_payload))
         # Wait for reply
         response = yield reply_channel.get()
-        if response.get('success', False):
+        if response.get("success", False):
             success = True
-            msg = ''
+            msg = ""
     if ros_service is not None:
         ros_service.execute_goal(success, msg)
     response = RESPONSE_ClawPayload(op=ClawOps.DROP, ent=me, success=success, msg=msg)
@@ -162,14 +177,18 @@ def drop_object(obj_name, me, ros_service: RosClawService = None):
     return success, msg
 
 
-def grabInstruction(ent: int, args: List[str], script: Script, event_store: FilterStore) -> States:
+def grabInstruction(
+    ent: int, args: List[str], script: Script, event_store: FilterStore
+) -> States:
     _ENV.process(pick_object(obj_name=args[0], me=ent))
     script.state = States.BLOCKED
     script.expecting.append(ClawDoneTag)
     return script.state
 
 
-def dropInstrution(ent: int, args: List[str], script: Script, event_store: FilterStore) -> States:
+def dropInstrution(
+    ent: int, args: List[str], script: Script, event_store: FilterStore
+) -> States:
     _ENV.process(drop_object(obj_name=args[0], me=ent))
     script.state = States.BLOCKED
     script.expecting.append(ClawDoneTag)
@@ -178,11 +197,15 @@ def dropInstrution(ent: int, args: List[str], script: Script, event_store: Filte
 
 def create_grab_and_drop_for_each_robot(world, event_store):
     services = []
-    for ent, (vel, pos, ros_goal) in world.get_components(Velocity, Position, NavToPoseRosGoal):
+    for ent, (vel, pos, ros_goal) in world.get_components(
+        Velocity, Position, NavToPoseRosGoal
+    ):
         grab = RosClawGrabService(
-            event_store=event_store, world=world, robot_name=ros_goal.name)
+            event_store=event_store, world=world, robot_name=ros_goal.name
+        )
         drop = RosClawDropService(
-            event_store=event_store, world=world, robot_name=ros_goal.name)
+            event_store=event_store, world=world, robot_name=ros_goal.name
+        )
         services.append(grab)
         services.append(drop)
     return services
@@ -193,12 +216,12 @@ class RosClawGrabService(RosClawService):
     def __init__(self, **kwargs):
         super().__init__()
         self.logger = logging.getLogger(__name__)
-        self.event_store = kwargs.get('event_store', None)
-        self.world = kwargs.get('world', None)
-        self.robot_name = kwargs.get('robot_name', None)
+        self.event_store = kwargs.get("event_store", None)
+        self.world = kwargs.get("world", None)
+        self.robot_name = kwargs.get("robot_name", None)
         self.goal_handle = None
         self.succeed = False
-        self.msg = ''
+        self.msg = ""
 
     def get_name(self):
         return self.robot_name + "/grab"
@@ -237,14 +260,14 @@ class RosClawGrabService(RosClawService):
 
     def handle_accepted_goal_callback(self, goal_handle: ServerGoalHandle):
         object = goal_handle.request.target_name
-        self.logger.info(
-            f'Received order for {self.robot_name} to grab {object}')
+        self.logger.info(f"Received order for {self.robot_name} to grab {object}")
         entity = find_robot_in_world(self.world, self.robot_name)
         if entity is None:
             return
         self.goal_handle = goal_handle
         payload = GRAB_ClawPayload(
-            op=ClawOps.GRAB, obj=object, me=entity, ros_service=self)
+            op=ClawOps.GRAB, obj=object, me=entity, ros_service=self
+        )
         event = EVENT(ClawTag, payload)
         self.event_store.put(event)
 
@@ -266,12 +289,12 @@ class RosClawDropService(RosClawService):
     def __init__(self, **kwargs):
         super().__init__()
         self.logger = logging.getLogger(__name__)
-        self.event_store = kwargs.get('event_store', None)
-        self.world = kwargs.get('world', None)
-        self.robot_name = kwargs.get('robot_name', None)
+        self.event_store = kwargs.get("event_store", None)
+        self.world = kwargs.get("world", None)
+        self.robot_name = kwargs.get("robot_name", None)
         self.goal_handle = None
         self.succeed = False
-        self.msg = ''
+        self.msg = ""
 
     def get_name(self):
         return self.robot_name + "/drop"
@@ -310,14 +333,14 @@ class RosClawDropService(RosClawService):
 
     def handle_accepted_goal_callback(self, goal_handle: ServerGoalHandle):
         object = goal_handle.request.attached_object_name
-        self.logger.info(
-            f'Received order for {self.robot_name} to drop {object}')
+        self.logger.info(f"Received order for {self.robot_name} to drop {object}")
         entity = find_robot_in_world(self.world, self.robot_name)
         if entity is None:
             return
         self.goal_handle = goal_handle
         payload = GRAB_ClawPayload(
-            op=ClawOps.DROP, obj=object, me=entity, ros_service=self)
+            op=ClawOps.DROP, obj=object, me=entity, ros_service=self
+        )
         event = EVENT(ClawTag, payload)
         self.event_store.put(event)
 
@@ -335,9 +358,12 @@ class RosClawDropService(RosClawService):
 
 
 def find_robot_in_world(world, robot_name):
-    for ent, (vel, pos, ros_goal) in world.get_components(Velocity, Position, NavToPoseRosGoal):
+    for ent, (vel, pos, ros_goal) in world.get_components(
+        Velocity, Position, NavToPoseRosGoal
+    ):
         if ros_goal.name == robot_name:
             return ent
     logging.getLogger(__name__).info(
-        'Could not find a robot with the name ' + robot_name)
+        "Could not find a robot with the name " + robot_name
+    )
     return None

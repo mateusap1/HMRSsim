@@ -18,8 +18,12 @@ import simulator.systems.ClawDESProcessor as ClawProcessor
 import simulator.systems.ScriptEventsDES as ScriptSystem
 import simulator.systems.GotoDESProcessor as NavigationSystem
 from simulator.systems.Observer import ObserverProcessor
-from simulator.systems.Tester import TesterDESProcessor, NearPosition, TesterState
-
+from simulator.systems.Tester import (
+    TesterDESProcessor,
+    NearPosition,
+    ChangedInventory,
+    TesterState,
+)
 from simulator.components.Script import Script, States
 from simulator.components.Inventory import Inventory
 from simulator.components.Position import Position
@@ -61,6 +65,7 @@ def setup_simulation(config: ConfigFormat, observer_components: List[Component])
     med_room = (514.5, 240.0)
     patient_room = (70.0, 220.0)
     robot_home = (495.0, 75.0)
+
     tester = TesterDESProcessor(
         [
             (
@@ -69,8 +74,16 @@ def setup_simulation(config: ConfigFormat, observer_components: List[Component])
             ),
             ("Go to med room", NearPosition(robot_ent, med_room, 15.0).requirement),
             (
+                "Grab claw",
+                ChangedInventory(1, "medicine").requirement,
+            ),
+            (
                 "Go to patient room",
                 NearPosition(robot_ent, patient_room, 15.0).requirement,
+            ),
+            (
+                "Drop claw",
+                ChangedInventory(1, "medicine").requirement,
             ),
             (
                 "Return to robot home",
