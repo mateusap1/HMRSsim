@@ -31,6 +31,7 @@ urdf-parser-py = "^0.0.4"
 lark-parser = "^0.12.0"
 lxml = "^5.3.0"
 cssselect = "^1.2.0"
+pybind11 = "^2.13.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "8.3.3"

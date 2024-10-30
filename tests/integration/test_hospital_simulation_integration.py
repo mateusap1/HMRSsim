@@ -75,7 +75,7 @@ def setup_simulation(config: ConfigFormat, observer_components: List[Component])
             ("Go to med room", NearPosition(robot_ent, med_room, 15.0).requirement),
             (
                 "Grab claw",
-                ChangedInventory(1, "medicine").requirement,
+                ChangedInventory(1, "medicine").removed_object_requirement,
             ),
             (
                 "Go to patient room",
@@ -83,7 +83,7 @@ def setup_simulation(config: ConfigFormat, observer_components: List[Component])
             ),
             (
                 "Drop claw",
-                ChangedInventory(1, "medicine").requirement,
+                ChangedInventory(1, "medicine").added_object_requirement,
             ),
             (
                 "Return to robot home",

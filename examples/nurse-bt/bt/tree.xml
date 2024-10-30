@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="LabSamples" BTCPP_format="3" >
+    <!-- ////////// -->
+    <BehaviorTree ID="Auth">
+        <Sequence>
+		<Action ID="ReceiveBarcode" barcode="{barcode}"/>
+		<Condition ID="CheckBarcode" barcode="{barcode}"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="Drawer">
+        <Sequence>
+            <Action ID="ReleaseDrawer"/>
+            <Condition ID="WaitDrawerClose"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="LabSamples">
+        <Fallback>
+            <Sequence>
+                <Sequence>
+                    <Action ID="MoveToNurse"/>
+                    <SubTree ID="Auth"/>
+                    <SubTree ID="Drawer"/>
+                </Sequence>
+                <Action ID="MoveToLab"/>
+                <Sequence>
+                    <SubTree ID="Auth"/>
+                    <SubTree ID="Drawer"/>
+                </Sequence>
+            </Sequence>
+            <Action ID="MoveToInitial"/>
+        </Fallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <SubTree ID="Auth"/>
+        <Condition ID="CheckBarcode">
+            <input_port name="barcode"/>
+        </Condition>
+        <SubTree ID="Drawer"/>
+        <Action ID="MoveToInitial"/>
+        <Action ID="MoveToLab"/>
+        <Action ID="MoveToNurse"/>
+        <Action ID="ReceiveBarcode">
+            <output_port name="barcode"/>
+        </Action>
+        <Action ID="ReleaseDrawer"/>
+        <Condition ID="WaitDrawerClose"/>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>
