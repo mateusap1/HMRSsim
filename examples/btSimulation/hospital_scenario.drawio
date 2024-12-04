@@ -9,8 +9,7 @@
                 <mxCell id="0" />
                 <mxCell id="1" parent="0" />
                 <object label="&lt;font color=&quot;#000000&quot;&gt;Robot&lt;/font&gt;"
-                    type="robot" collision_tag="stopEvent" component_Claw="[80, 1]"
-                    component_Script="[[&quot;Go medRoom&quot;, &quot;Grab medicine&quot;, &quot;Go patientRoom&quot;, &quot;Drop medicine&quot;, &quot;Go robotHome&quot;], 0]"
+                    type="robot" collision_tag="stopEvent"
                     id="XaaZAw79OCWD7nJUf5TW-4">
                     <mxCell
                         style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#B09500;fontColor=#ffffff;fillColor=#e3c800;"
