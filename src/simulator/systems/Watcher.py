@@ -35,3 +35,6 @@ class WatcherDESProcessor:
 
     def _process_event(self, event: EVENT):
         self.observer_memory.append(event.payload)
+
+    def _print_memory(self):
+        print("Memory:", self.observer_memory)

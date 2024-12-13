@@ -40,6 +40,8 @@ class GotoDESProcessor:
 
         while True:
             event = yield event_store.get(lambda ev: ev.type in [GotoPoiEventTag, GotoPosEventTag])
+            
+            self.logger.debug("Received GoToPos event. Processing...")
             self._process_event(world, world_map, event_store, event)
 
     def _get_event_store(self, kwargs: SystemArgs) -> FilterStore:

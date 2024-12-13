@@ -5,11 +5,15 @@ from simulator.systems.CollisionProcessor import CollisionProcessor
 from simulator.systems.PathProcessor import PathProcessor
 from simulator.systems.GotoDESProcessor import GotoDESProcessor
 from simulator.systems.BridgePlugin import BridgeProcessor
+from simulator.systems.Observer import ObserverProcessor
+from simulator.systems.Watcher import WatcherDESProcessor
 from simulator.systems import SeerPlugin
 
 from simulator.main import Simulator
 
 from simulator.utils.Firebase import Firebase_conn
+
+from simulator.components.Position import Position
 
 
 def setup():
@@ -25,20 +29,22 @@ def setup():
     build_report = simulator.build_report
     firebase.send_build_report(build_report)
 
-    NavigationSystemProcess = GotoDESProcessor().process
-
     # Defines and initializes esper.Processor for the simulation
     normal_processors = [
         MovementProcessor(minx=0, miny=0, maxx=width, maxy=height),
         CollisionProcessor(),
         PathProcessor(),
-        BridgeProcessor()
+        BridgeProcessor(),
+        ObserverProcessor([Position]),
     ]
+
+    watcher = WatcherDESProcessor()
 
     # Defines DES processors
     des_processors = [
         SeerPlugin.init([firebase.seer_consumer], 0.05, False),
-        (NavigationSystemProcess,),
+        (GotoDESProcessor().process,),
+        (watcher.process, watcher._print_memory),
     ]
 
     # Add processors to the simulation, according to processor type

@@ -299,7 +299,7 @@ class Simulator:
             next_function = self.cleanups.pop()
             logger.info(f"Executing clean-up function {next_function}")
             next_function()
-
+        
     def run(self):
         """
         Runs the simulation.
@@ -321,6 +321,8 @@ class Simulator:
         except RuntimeError as err:
             logger.error(f"Simulation aborted with critical error.")
             logger.error(err)
+        except KeyboardInterrupt:
+            logging.info("Simulation ending, user interrupt.")
         finally:
             logger.info("============ CLEAN UP STAGE ============")
             self.gracious_exit()
