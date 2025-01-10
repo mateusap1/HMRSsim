@@ -7,6 +7,7 @@ from simulator.systems.GotoDESProcessor import GotoDESProcessor
 from simulator.systems.BridgePlugin import BridgeProcessor
 from simulator.systems.Observer import ObserverProcessor
 from simulator.systems.Watcher import WatcherDESProcessor
+from simulator.systems.Seer import Seer
 import simulator.systems.ManageObjects as ObjectManager
 from simulator.systems import SeerPlugin
 
@@ -40,12 +41,12 @@ def setup():
         ObserverProcessor([Position, Skeleton]),
     ]
 
-    watcher = WatcherDESProcessor([firebase.seer_consumer])
+    # watcher = WatcherDESProcessor([firebase.seer_consumer])
 
     # Defines DES processors
     des_processors = [
         # SeerPlugin.init([firebase.seer_consumer], 0.05, False),
-        (watcher.process,),
+        (Seer([firebase.seer_consumer], 0.05).process, ),
         (GotoDESProcessor().process,),
         (ObjectManager.process,),
     ]
