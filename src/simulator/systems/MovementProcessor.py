@@ -37,7 +37,6 @@ class MovementProcessor(esper.Processor):
 
     def get_move_ents(self) -> List[Tuple[int, Tuple[Position, Velocity]]]:
         # Returns every entity which has both of these components
-
         return self.world.get_components(Position, Velocity)
 
     def calculate_new_position(
@@ -103,7 +102,7 @@ class MovementProcessor(esper.Processor):
         if not self.setup_ready:
             self.setup()
 
-        for _, (position, velocity) in self.get_move_ents():
+        for ent, (position, velocity) in self.get_move_ents():
             self.update_position(position, velocity)
 
     def add_sector_info(self, pos: Position):

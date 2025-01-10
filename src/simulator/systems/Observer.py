@@ -152,7 +152,7 @@ class ObserverProcessor(esper.Processor):
                 EVENT(
                     ObserverTag,
                     ObserverPayload(
-                        env.now,
+                        float(env.now),
                         [
                             ObserverChange(ent, change)
                             for ent, change in state_change.items()
