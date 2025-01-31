@@ -45,7 +45,6 @@ def setup():
 
     # Defines DES processors
     des_processors = [
-        # SeerPlugin.init([firebase.seer_consumer], 0.05, False),
         (Seer([firebase.seer_consumer], 0.05).process, ),
         (GotoDESProcessor().process,),
         (ObjectManager.process,),
