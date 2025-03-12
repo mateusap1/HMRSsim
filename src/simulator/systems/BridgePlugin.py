@@ -131,7 +131,7 @@ class BridgeProcessor(esper.Processor):
 
             return {component_name: {attribute: getattr(component, attribute)}}
 
-        return {component_name: self._serialize(vars(component), in_key=True)}
+        return {component_name: self._serialize(vars(component), in_key=False)}
 
     def _get_component(self, ent: int, component: Type[Component]) -> Component:
         try:
