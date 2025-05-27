@@ -85,20 +85,20 @@ class BridgeProcessor(esper.Processor):
         """Start the FastAPI server in a separate thread."""
 
         def run_server():
-            # log_config = (
-            #     uvicorn.config.LOGGING_CONFIG
-            # )  # Get Uvicorn's default log config
-            # log_config["loggers"]["uvicorn"]["level"] = "CRITICAL"  # Suppress most logs
-            # log_config["loggers"]["uvicorn.access"][
-            #     "level"
-            # ] = "CRITICAL"  # Suppress request logs
-            # log_config["loggers"]["uvicorn.error"][
-            #     "level"
-            # ] = "CRITICAL"  # Suppress error logs
+            log_config = (
+                uvicorn.config.LOGGING_CONFIG
+            )  # Get Uvicorn's default log config
+            log_config["loggers"]["uvicorn"]["level"] = "CRITICAL"  # Suppress most logs
+            log_config["loggers"]["uvicorn.access"][
+                "level"
+            ] = "CRITICAL"  # Suppress request logs
+            log_config["loggers"]["uvicorn.error"][
+                "level"
+            ] = "CRITICAL"  # Suppress error logs
 
-            # uvicorn.run(self.app, host="127.0.0.1", port=8000, log_config=log_config)
+            uvicorn.run(self.app, host="127.0.0.1", port=8000, log_config=log_config)
 
-            uvicorn.run(self.app, host="127.0.0.1", port=8000)
+            # uvicorn.run(self.app, host="127.0.0.1", port=8000)
 
         self.api_thread = threading.Thread(target=run_server, daemon=True)
         self.api_thread.start()

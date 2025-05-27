@@ -175,3 +175,5 @@ install/
 log/
 
 firebase.json
+
+.DS_Store
