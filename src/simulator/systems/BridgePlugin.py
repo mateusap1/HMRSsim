@@ -1,4 +1,3 @@
-import json
 import esper
 import uvicorn
 import logging
