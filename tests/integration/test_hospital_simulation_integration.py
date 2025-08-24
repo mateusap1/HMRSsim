@@ -138,7 +138,11 @@ def config_path(tmp_path):
 
 @pytest.fixture
 def mock_map(tmp_path):
-    map_content = """
+    steps = ["Go medRoom", "Grab medicine", "Go patientRoom", "Drop medicine", "Go robotHome"]
+    steps_str = ", ".join([f"&quot;{step}&quot;" for step in steps])
+    component_script = f"[[{steps_str}], 0]"
+    
+    map_content = f"""
     <mxfile host="" modified="2021-03-05T12:07:23.856Z"
     agent="5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36"
     etag="4gopTQFj9oIBlTbiy7g3" version="13.7.9" type="embed">
@@ -151,7 +155,7 @@ def mock_map(tmp_path):
                 <mxCell id="1" parent="0" />
                 <object label="&lt;font color=&quot;#000000&quot;&gt;Robot&lt;/font&gt;"
                     type="robot" collision_tag="stopEvent" component_Claw="[80, 1]"
-                    component_Script="[[&quot;Go medRoom&quot;, &quot;Grab medicine&quot;, &quot;Go patientRoom&quot;, &quot;Drop medicine&quot;, &quot;Go robotHome&quot;], 0]"
+                    component_Script="{component_script}"
                     id="XaaZAw79OCWD7nJUf5TW-4">
                     <mxCell
                         style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#B09500;fontColor=#ffffff;fillColor=#e3c800;"

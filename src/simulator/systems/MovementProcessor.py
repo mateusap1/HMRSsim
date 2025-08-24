@@ -14,6 +14,8 @@ class MovementProcessor(esper.Processor):
         self, minx: float, maxx: float, miny: float, maxy: float, sector_size: int = 50
     ):
         super().__init__()
+        
+        self.world: esper.World = self.world
 
         self.minx = minx
         self.miny = miny
