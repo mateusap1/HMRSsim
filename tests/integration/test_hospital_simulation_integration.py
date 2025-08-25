@@ -136,9 +136,16 @@ def config_path(tmp_path):
     return str(config_file)
 
 
-@pytest.fixture
-def mock_map(tmp_path):
-    steps = ["Go medRoom", "Grab medicine", "Go patientRoom", "Drop medicine", "Go robotHome"]
+@pytest.fixture(params=[
+    (["Go medRoom", "Grab medicine", "Go patientRoom", "Drop medicine", "Go robotHome"], True),
+    (["Grab medicine", "Go patientRoom", "Drop medicine", "Go robotHome"], False),
+    (["Go medRoom", "Go patientRoom", "Go robotHome"], False),
+    (["Go medRoom", "Grab medicine", "Drop medicine", "Go robotHome"], False),
+    (["Go medRoom", "Grab medicine", "Go patientRoom", "Go robotHome"], False),
+    (["Go medRoom", "Grab medicine", "Go patientRoom", "Drop medicine"], False),
+])
+def mock_map(request, tmp_path):
+    steps, state = request.param
     steps_str = ", ".join([f"&quot;{step}&quot;" for step in steps])
     component_script = f"[[{steps_str}], 0]"
     
@@ -328,8 +335,11 @@ def mock_map(tmp_path):
     map_file = tmp_path / "hospital_map.xml"
     map_file.write_text(map_content)
 
+    return TesterState.SUCCESS if state else TesterState.FAILURE
+
 
 def test_hospital_simulation_integration(tmp_path, mock_map):
+    state = mock_map
     sim, tester = setup_simulation(
         {
             "context": ".",
@@ -347,7 +357,7 @@ def test_hospital_simulation_integration(tmp_path, mock_map):
     tester.finish()
     tester.print_state()
 
-    assert tester.state == TesterState.SUCCESS
+    assert tester.state == state
 
 
 if __name__ == "__main__":
