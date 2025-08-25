@@ -1,13 +1,13 @@
 from enum import Enum
 from abc import abstractmethod
 
-from moveit_msgs.action import Pickup, Place
+# from moveit_msgs.action import Pickup, Place
 
 from typing import NamedTuple, List
 from esper import World
 from simpy import FilterStore, Store, Environment
-from rclpy.action import CancelResponse, GoalResponse
-from rclpy.action.server import ServerGoalHandle
+# from rclpy.action import CancelResponse, GoalResponse
+# from rclpy.action.server import ServerGoalHandle
 
 from simulator.typehints.component_types import EVENT
 from simulator.typehints.dict_types import SystemArgs
@@ -195,166 +195,166 @@ def dropInstrution(
     return script.state
 
 
-def create_grab_and_drop_for_each_robot(world, event_store):
-    services = []
-    for ent, (vel, pos, ros_goal) in world.get_components(
-        Velocity, Position, NavToPoseRosGoal
-    ):
-        grab = RosClawGrabService(
-            event_store=event_store, world=world, robot_name=ros_goal.name
-        )
-        drop = RosClawDropService(
-            event_store=event_store, world=world, robot_name=ros_goal.name
-        )
-        services.append(grab)
-        services.append(drop)
-    return services
+# def create_grab_and_drop_for_each_robot(world, event_store):
+#     services = []
+#     for ent, (vel, pos, ros_goal) in world.get_components(
+#         Velocity, Position, NavToPoseRosGoal
+#     ):
+#         grab = RosClawGrabService(
+#             event_store=event_store, world=world, robot_name=ros_goal.name
+#         )
+#         drop = RosClawDropService(
+#             event_store=event_store, world=world, robot_name=ros_goal.name
+#         )
+#         services.append(grab)
+#         services.append(drop)
+#     return services
 
 
-class RosClawGrabService(RosClawService):
+# class RosClawGrabService(RosClawService):
 
-    def __init__(self, **kwargs):
-        super().__init__()
-        self.logger = logging.getLogger(__name__)
-        self.event_store = kwargs.get("event_store", None)
-        self.world = kwargs.get("world", None)
-        self.robot_name = kwargs.get("robot_name", None)
-        self.goal_handle = None
-        self.succeed = False
-        self.msg = ""
+#     def __init__(self, **kwargs):
+#         super().__init__()
+#         self.logger = logging.getLogger(__name__)
+#         self.event_store = kwargs.get("event_store", None)
+#         self.world = kwargs.get("world", None)
+#         self.robot_name = kwargs.get("robot_name", None)
+#         self.goal_handle = None
+#         self.succeed = False
+#         self.msg = ""
 
-    def get_name(self):
-        return self.robot_name + "/grab"
+#     def get_name(self):
+#         return self.robot_name + "/grab"
 
-    def result_callback(self, goal_handle: ServerGoalHandle):
-        self.update_goal_handle(goal_handle)
-        result = Pickup.Result()
-        result.trajectory_descriptions = [self.msg]
-        return result
+#     def result_callback(self, goal_handle: ServerGoalHandle):
+#         self.update_goal_handle(goal_handle)
+#         result = Pickup.Result()
+#         result.trajectory_descriptions = [self.msg]
+#         return result
 
-    def update_goal_handle(self, goal_handle: ServerGoalHandle):
-        if self.succeed:
-            goal_handle.succeed()
-            return
-        goal_handle.abort()
+#     def update_goal_handle(self, goal_handle: ServerGoalHandle):
+#         if self.succeed:
+#             goal_handle.succeed()
+#             return
+#         goal_handle.abort()
 
-    def get_execute_callback(self):
-        return self.result_callback
+#     def get_execute_callback(self):
+#         return self.result_callback
 
-    def execute_goal(self, succeed=False, msg=None):
-        if self.goal_handle is None:
-            return
-        self.succeed = succeed
-        self.msg = msg
-        self.goal_handle.execute()
+#     def execute_goal(self, succeed=False, msg=None):
+#         if self.goal_handle is None:
+#             return
+#         self.succeed = succeed
+#         self.msg = msg
+#         self.goal_handle.execute()
 
-    def goal_callback(self, goal_request):
-        entity = find_robot_in_world(self.world, self.robot_name)
-        if entity is not None:
-            return GoalResponse.ACCEPT
-        self.logger.warn(f"Coudn't find a robot named {self.robot_name}")
-        return GoalResponse.REJECT
+#     def goal_callback(self, goal_request):
+#         entity = find_robot_in_world(self.world, self.robot_name)
+#         if entity is not None:
+#             return GoalResponse.ACCEPT
+#         self.logger.warn(f"Coudn't find a robot named {self.robot_name}")
+#         return GoalResponse.REJECT
 
-    def get_goal_callback(self):
-        return self.goal_callback
+#     def get_goal_callback(self):
+#         return self.goal_callback
 
-    def handle_accepted_goal_callback(self, goal_handle: ServerGoalHandle):
-        object = goal_handle.request.target_name
-        self.logger.info(f"Received order for {self.robot_name} to grab {object}")
-        entity = find_robot_in_world(self.world, self.robot_name)
-        if entity is None:
-            return
-        self.goal_handle = goal_handle
-        payload = GRAB_ClawPayload(
-            op=ClawOps.GRAB, obj=object, me=entity, ros_service=self
-        )
-        event = EVENT(ClawTag, payload)
-        self.event_store.put(event)
+#     def handle_accepted_goal_callback(self, goal_handle: ServerGoalHandle):
+#         object = goal_handle.request.target_name
+#         self.logger.info(f"Received order for {self.robot_name} to grab {object}")
+#         entity = find_robot_in_world(self.world, self.robot_name)
+#         if entity is None:
+#             return
+#         self.goal_handle = goal_handle
+#         payload = GRAB_ClawPayload(
+#             op=ClawOps.GRAB, obj=object, me=entity, ros_service=self
+#         )
+#         event = EVENT(ClawTag, payload)
+#         self.event_store.put(event)
 
-    def get_handle_accepted_goal_callback(self):
-        return self.handle_accepted_goal_callback
+#     def get_handle_accepted_goal_callback(self):
+#         return self.handle_accepted_goal_callback
 
-    def cancel_callback(self, goal_handle: ServerGoalHandle):
-        return CancelResponse.REJECT
+#     def cancel_callback(self, goal_handle: ServerGoalHandle):
+#         return CancelResponse.REJECT
 
-    def get_cancel_callback(self):
-        return self.cancel_callback
+#     def get_cancel_callback(self):
+#         return self.cancel_callback
 
-    def get_service_type(self):
-        return Pickup
+#     def get_service_type(self):
+#         return Pickup
 
 
-class RosClawDropService(RosClawService):
+# class RosClawDropService(RosClawService):
 
-    def __init__(self, **kwargs):
-        super().__init__()
-        self.logger = logging.getLogger(__name__)
-        self.event_store = kwargs.get("event_store", None)
-        self.world = kwargs.get("world", None)
-        self.robot_name = kwargs.get("robot_name", None)
-        self.goal_handle = None
-        self.succeed = False
-        self.msg = ""
+#     def __init__(self, **kwargs):
+#         super().__init__()
+#         self.logger = logging.getLogger(__name__)
+#         self.event_store = kwargs.get("event_store", None)
+#         self.world = kwargs.get("world", None)
+#         self.robot_name = kwargs.get("robot_name", None)
+#         self.goal_handle = None
+#         self.succeed = False
+#         self.msg = ""
 
-    def get_name(self):
-        return self.robot_name + "/drop"
+#     def get_name(self):
+#         return self.robot_name + "/drop"
 
-    def result_callback(self, goal_handle: ServerGoalHandle):
-        self.update_goal_handle(goal_handle)
-        result = Place.Result()
-        result.trajectory_descriptions = [self.msg]
-        return result
+#     def result_callback(self, goal_handle: ServerGoalHandle):
+#         self.update_goal_handle(goal_handle)
+#         result = Place.Result()
+#         result.trajectory_descriptions = [self.msg]
+#         return result
 
-    def update_goal_handle(self, goal_handle: ServerGoalHandle):
-        if self.succeed:
-            goal_handle.succeed()
-            return
-        goal_handle.abort()
+#     def update_goal_handle(self, goal_handle: ServerGoalHandle):
+#         if self.succeed:
+#             goal_handle.succeed()
+#             return
+#         goal_handle.abort()
 
-    def get_execute_callback(self):
-        return self.result_callback
+#     def get_execute_callback(self):
+#         return self.result_callback
 
-    def execute_goal(self, succeed=False, msg=None):
-        if self.goal_handle is None:
-            return
-        self.succeed = succeed
-        self.msg = msg
-        self.goal_handle.execute()
+#     def execute_goal(self, succeed=False, msg=None):
+#         if self.goal_handle is None:
+#             return
+#         self.succeed = succeed
+#         self.msg = msg
+#         self.goal_handle.execute()
 
-    def goal_callback(self, goal_request):
-        entity = find_robot_in_world(self.world, self.robot_name)
-        if entity is not None:
-            return GoalResponse.ACCEPT
-        self.logger.warn(f"Coudn't find a robot named {self.robot_name}")
-        return GoalResponse.REJECT
+#     def goal_callback(self, goal_request):
+#         entity = find_robot_in_world(self.world, self.robot_name)
+#         if entity is not None:
+#             return GoalResponse.ACCEPT
+#         self.logger.warn(f"Coudn't find a robot named {self.robot_name}")
+#         return GoalResponse.REJECT
 
-    def get_goal_callback(self):
-        return self.goal_callback
+#     def get_goal_callback(self):
+#         return self.goal_callback
 
-    def handle_accepted_goal_callback(self, goal_handle: ServerGoalHandle):
-        object = goal_handle.request.attached_object_name
-        self.logger.info(f"Received order for {self.robot_name} to drop {object}")
-        entity = find_robot_in_world(self.world, self.robot_name)
-        if entity is None:
-            return
-        self.goal_handle = goal_handle
-        payload = GRAB_ClawPayload(
-            op=ClawOps.DROP, obj=object, me=entity, ros_service=self
-        )
-        event = EVENT(ClawTag, payload)
-        self.event_store.put(event)
+#     def handle_accepted_goal_callback(self, goal_handle: ServerGoalHandle):
+#         object = goal_handle.request.attached_object_name
+#         self.logger.info(f"Received order for {self.robot_name} to drop {object}")
+#         entity = find_robot_in_world(self.world, self.robot_name)
+#         if entity is None:
+#             return
+#         self.goal_handle = goal_handle
+#         payload = GRAB_ClawPayload(
+#             op=ClawOps.DROP, obj=object, me=entity, ros_service=self
+#         )
+#         event = EVENT(ClawTag, payload)
+#         self.event_store.put(event)
 
-    def get_handle_accepted_goal_callback(self):
-        return self.handle_accepted_goal_callback
+#     def get_handle_accepted_goal_callback(self):
+#         return self.handle_accepted_goal_callback
 
-    def cancel_callback(self, goal_handle: ServerGoalHandle):
-        return CancelResponse.REJECT
+#     def cancel_callback(self, goal_handle: ServerGoalHandle):
+#         return CancelResponse.REJECT
 
-    def get_cancel_callback(self):
-        return self.cancel_callback
+#     def get_cancel_callback(self):
+#         return self.cancel_callback
 
-    def get_service_type(self):
-        return Place
+#     def get_service_type(self):
+#         return Place
 
 
 def find_robot_in_world(world, robot_name):

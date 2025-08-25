@@ -12,7 +12,7 @@ class Position(Component):
         self.w = w
         self.h = h
         self.angle = angle
-        self.changed = False
+        self.changed = True
         self.movable = movable
         self.center: Point = (x + w // 2, y + h // 2)
         self.sector = None

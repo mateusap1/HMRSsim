@@ -19,6 +19,7 @@ def consumer_manager(consumers: List[Callable], also_log: bool):
     logging.addLevelName(15, 'SEER')
     while True:
         message, msg_idx = message_buffer.get()  # Blocking function
+        # print(message)
         if also_log:
             logger.log(15, message)
         for c in consumers:
@@ -72,6 +73,8 @@ def init(consumers: List[Callable], scan_interval: float, also_log=False):
                 if ent == 1:  # Entity 1 is the entire model
                     continue
                 elif last_round.get(ent, (0, None))[0] != 0 and not position.changed and not skeleton.changed:
+                    # if ent == 2:
+                    #     print(position.x, position.y, position.w, position.h, position.changed)
                     last_round[ent] = (2, skeleton.id)
                     continue
 
@@ -87,6 +90,7 @@ def init(consumers: List[Callable], scan_interval: float, also_log=False):
                 last_round[ent] = (2, skeleton.id)
                 position.changed = False
                 skeleton.changed = False
+
             # Check for deleted entities
             deleted = []
             for k, v in last_round.items():
@@ -97,6 +101,7 @@ def init(consumers: List[Callable], scan_interval: float, also_log=False):
                     last_round[k] = (0, v[1])
             if len(deleted) > 0:
                 new_message['deleted'] = deleted
+
             # Add message to queue
             message_buffer.put((new_message, msg_idx))
             msg_idx += 1

@@ -1,0 +1,1 @@
+curl -X POST http://127.0.0.1:8000/trigger -H "Content-Type: application/json" -d '{"type": "GoToPosEvent", "payloadName": "GotoPosPayload", "payload": {"entity": 2, "target": [350.0, 120.0]}}'

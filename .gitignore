@@ -173,3 +173,7 @@ src/ros2_ws/log/
 src/ros2_ws/build/
 install/
 log/
+
+firebase.json
+
+.DS_Store

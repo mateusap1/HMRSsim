@@ -1,0 +1,7 @@
+curl -X GET \
+  -H "Content-type: application/json" \
+  "http://127.0.0.1:8000/query/{ent}/{component}"
+
+  curl -X GET \
+  -H "Content-type: application/json" \
+  "http://127.0.0.1:8000/query/2/position"

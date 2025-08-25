@@ -3,7 +3,7 @@
     "map": "poi_test.drawio",
     "FPS": 60,
     "DLW": 10,
-    "duration": 10,
+    "duration": 15,
     "verbose": 20,
     "simulatorConfigOptions": {
         "loggerConfig": "loggerConfig.yml"
